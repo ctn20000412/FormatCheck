@@ -1,0 +1,698 @@
+openapi: 3.0.3
+info:
+  title: 文档规范检查系统 API
+  version: 1.0.0
+  description: 面向 Vue 前端的 Java 后端接口，以及 Java 调 Python Agent 的内部接口。
+servers:
+  - url: http://localhost:8080/api
+    description: Java Backend
+tags:
+  - name: Session
+  - name: Rule
+  - name: RuleImport
+  - name: Check
+  - name: InternalAgent
+paths:
+  /sessions:
+    post:
+      tags: [Session]
+      summary: 创建会话
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSessionRequest'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseSessionVO'
+
+  /sessions/{sessionId}:
+    get:
+      tags: [Session]
+      summary: 查询会话详情
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseSessionDetailVO'
+
+  /sessions/{sessionId}/files/standard:
+    post:
+      tags: [Session]
+      summary: 上传规范文档
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: 上传成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseFileUploadVO'
+
+  /sessions/{sessionId}/files/target:
+    post:
+      tags: [Session]
+      summary: 上传待检查文档
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: 上传成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseFileUploadVO'
+
+  /sessions/{sessionId}/files/rule-final:
+    post:
+      tags: [RuleImport]
+      summary: 直接上传完整规范.js
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: 上传成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseRuleImportVO'
+
+  /rules/extract:
+    post:
+      tags: [Rule]
+      summary: 发起规则抽取
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RuleExtractRequest'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseTaskVO'
+
+  /rules/{sessionId}:
+    get:
+      tags: [Rule]
+      summary: 获取当前规则内容
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseRuleVO'
+
+  /rules/{sessionId}/confirm:
+    post:
+      tags: [Rule]
+      summary: 确认并保存最终规则
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfirmRuleRequest'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseRuleConfirmVO'
+
+  /checks:
+    post:
+      tags: [Check]
+      summary: 发起格式检查
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckRequest'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseTaskVO'
+
+  /checks/{sessionId}/result:
+    get:
+      tags: [Check]
+      summary: 获取检查结果
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseCheckResultVO'
+
+  /files/download:
+    get:
+      tags: [Session]
+      summary: 下载产物文件
+      parameters:
+        - in: query
+          name: sessionId
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: fileType
+          required: true
+          schema:
+            type: string
+            enum: [STANDARD_FILE, TARGET_FILE, RULE_DRAFT, RULE_FINAL, REPORT_JSON, REPORT_MD, ANNOTATED_DOC]
+      responses:
+        '200':
+          description: 文件流
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+
+  /internal/agent/rules/extract:
+    post:
+      tags: [InternalAgent]
+      summary: Java 调 Python 规则抽取 Agent
+      servers:
+        - url: http://localhost:9000
+          description: Python Agent Service
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InternalRuleExtractRequest'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalRuleExtractResponse'
+
+  /internal/agent/checks/execute:
+    post:
+      tags: [InternalAgent]
+      summary: Java 调 Python 格式检查 Agent
+      servers:
+        - url: http://localhost:9000
+          description: Python Agent Service
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InternalCheckRequest'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalCheckResponse'
+
+components:
+  parameters:
+    SessionId:
+      in: path
+      name: sessionId
+      required: true
+      schema:
+        type: string
+
+  schemas:
+    ApiResponseSessionVO:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 0
+        message:
+          type: string
+          example: success
+        data:
+          $ref: '#/components/schemas/SessionVO'
+
+    ApiResponseSessionDetailVO:
+      type: object
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/SessionDetailVO'
+
+    ApiResponseFileUploadVO:
+      type: object
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/FileUploadVO'
+
+    ApiResponseTaskVO:
+      type: object
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/TaskVO'
+
+    ApiResponseRuleVO:
+      type: object
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/RuleVO'
+
+    ApiResponseRuleConfirmVO:
+      type: object
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/RuleConfirmVO'
+
+    ApiResponseRuleImportVO:
+      type: object
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/RuleImportVO'
+
+    ApiResponseCheckResultVO:
+      type: object
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/CheckResultVO'
+
+    CreateSessionRequest:
+      type: object
+      required: [type]
+      properties:
+        type:
+          type: string
+          enum: [RULE_EXTRACTION, RULE_IMPORT, FORMAT_CHECK]
+        name:
+          type: string
+
+    SessionVO:
+      type: object
+      properties:
+        sessionId:
+          type: string
+        type:
+          type: string
+        status:
+          type: string
+        ruleSource:
+          type: string
+          enum: [EXTRACTED, IMPORTED]
+        createdAt:
+          type: string
+          format: date-time
+
+    SessionDetailVO:
+      allOf:
+        - $ref: '#/components/schemas/SessionVO'
+        - type: object
+          properties:
+            updatedAt:
+              type: string
+              format: date-time
+            files:
+              type: array
+              items:
+                $ref: '#/components/schemas/FileItemVO'
+            summary:
+              type: object
+
+    FileUploadVO:
+      type: object
+      properties:
+        sessionId:
+          type: string
+        fileName:
+          type: string
+        storedPath:
+          type: string
+        fileSize:
+          type: integer
+          format: int64
+
+    TaskVO:
+      type: object
+      properties:
+        sessionId:
+          type: string
+        taskId:
+          type: string
+        status:
+          type: string
+          enum: [CREATED, UPLOADED, PROCESSING, WAITING_CONFIRM, CONFIRMED, COMPLETED, FAILED]
+        traceId:
+          type: string
+
+    RuleExtractRequest:
+      type: object
+      required: [sessionId]
+      properties:
+        sessionId:
+          type: string
+        schemaVersion:
+          type: string
+
+    RuleVO:
+      type: object
+      properties:
+        sessionId:
+          type: string
+        status:
+          type: string
+        draftRuleFileName:
+          type: string
+        ruleContent:
+          type: array
+          items:
+            $ref: '#/components/schemas/RuleItem'
+
+    ConfirmRuleRequest:
+      type: object
+      required: [sessionId, ruleContent]
+      properties:
+        sessionId:
+          type: string
+        ruleContent:
+          type: array
+          items:
+            $ref: '#/components/schemas/RuleItem'
+        versionNote:
+          type: string
+
+    RuleConfirmVO:
+      type: object
+      properties:
+        sessionId:
+          type: string
+        finalRuleFileName:
+          type: string
+        ruleVersion:
+          type: integer
+        deletedDraft:
+          type: boolean
+
+    RuleImportVO:
+      type: object
+      properties:
+        sessionId:
+          type: string
+        finalRuleFileName:
+          type: string
+          example: 完整规范.js
+        validated:
+          type: boolean
+        status:
+          type: string
+          example: CONFIRMED
+
+    CheckRequest:
+      type: object
+      required: [sessionId, ruleSessionId]
+      properties:
+        sessionId:
+          type: string
+        ruleSessionId:
+          type: string
+          description: 可引用规则抽取会话或规则直传会话
+        checkLevel:
+          type: string
+          enum: [STRICT, NORMAL, LOOSE]
+          default: NORMAL
+
+    CheckResultVO:
+      type: object
+      properties:
+        sessionId:
+          type: string
+        status:
+          type: string
+        summary:
+          $ref: '#/components/schemas/IssueSummaryVO'
+        issues:
+          type: array
+          items:
+            $ref: '#/components/schemas/IssueVO'
+        reportFiles:
+          type: array
+          items:
+            $ref: '#/components/schemas/FileItemVO'
+
+    IssueSummaryVO:
+      type: object
+      properties:
+        totalIssues:
+          type: integer
+        criticalIssues:
+          type: integer
+        majorIssues:
+          type: integer
+        minorIssues:
+          type: integer
+
+    IssueVO:
+      type: object
+      properties:
+        id:
+          type: string
+        location:
+          $ref: '#/components/schemas/LocationVO'
+        ruleId:
+          type: string
+        ruleName:
+          type: string
+        sourceText:
+          type: string
+        applicableSections:
+          type: array
+          items:
+            type: string
+        checkObject:
+          type: array
+          items:
+            type: string
+        severity:
+          type: string
+          enum: [CRITICAL, MAJOR, MINOR]
+        reason:
+          type: string
+        suggestion:
+          type: string
+        expectedValue:
+          type: string
+        actualValue:
+          type: string
+
+    RuleItem:
+      type: object
+      required: [rule_id, category, scope, rule_name, description, check_type, check_object, expected, severity, source_text, applicable_sections, user_confirmed]
+      properties:
+        rule_id:
+          type: string
+        category:
+          type: string
+        scope:
+          type: string
+        rule_name:
+          type: string
+        description:
+          type: string
+        check_type:
+          type: string
+          enum: [exact, llm, hybrid]
+        check_object:
+          type: array
+          items:
+            type: string
+        expected:
+          type: object
+          additionalProperties: true
+        severity:
+          type: string
+          enum: [high, medium, low]
+        source_text:
+          type: string
+        applicable_sections:
+          type: array
+          items:
+            type: string
+        user_confirmed:
+          type: boolean
+
+    LocationVO:
+      type: object
+      properties:
+        page:
+          type: integer
+        paragraphIndex:
+          type: integer
+        heading:
+          type: string
+
+    FileItemVO:
+      type: object
+      properties:
+        fileName:
+          type: string
+        fileType:
+          type: string
+        downloadUrl:
+          type: string
+
+    InternalRuleExtractRequest:
+      type: object
+      required: [sessionId, filePath, promptText]
+      properties:
+        sessionId:
+          type: string
+        filePath:
+          type: string
+        outputDir:
+          type: string
+        promptText:
+          type: string
+          description: 规则抽取提示词
+        schemaVersion:
+          type: string
+
+    InternalRuleExtractResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        ruleContent:
+          type: array
+          items:
+            $ref: '#/components/schemas/RuleItem'
+        draftRulePath:
+          type: string
+        warnings:
+          type: array
+          items:
+            type: string
+
+    InternalCheckRequest:
+      type: object
+      required: [sessionId, targetFilePath, ruleFilePath, outputDir, promptText]
+      properties:
+        sessionId:
+          type: string
+        targetFilePath:
+          type: string
+        ruleFilePath:
+          type: string
+        outputDir:
+          type: string
+        promptText:
+          type: string
+          description: 格式检查提示词
+        checkLevel:
+          type: string
+
+    InternalCheckResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        summary:
+          $ref: '#/components/schemas/IssueSummaryVO'
+        issues:
+          type: array
+          items:
+            $ref: '#/components/schemas/IssueVO'
+        reportJsonPath:
+          type: string
+        reportMdPath:
+          type: string
+        annotatedDocPath:
+          type: string
+        warnings:
+          type: array
+          items:
+            type: string

@@ -1,0 +1,13 @@
+{
+  "sessionId" : "sess_20260421200056_8ed944",
+  "name" : "测试规则抽取",
+  "type" : "RULE_EXTRACTION",
+  "status" : "WAITING_CONFIRM",
+  "createdAt" : "2026-04-21T12:00:56.9588958Z",
+  "updatedAt" : "2026-04-21T20:00:57.0371099+08:00",
+  "ruleVersion" : 0,
+  "standardFileName" : "standard.docx",
+  "targetFileName" : null,
+  "ruleSource" : "EXTRACTED",
+  "errorMessage" : null
+}

@@ -1,0 +1,55 @@
+spring:
+  application:
+    name: format-check-backend
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+      - org.mybatis.spring.boot.autoconfigure.MybatisAutoConfiguration
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+app:
+  agent:
+    mode: mock
+    base-url: http://localhost:9000
+    connect-timeout-seconds: 10
+    read-timeout-seconds: 180
+    default-provider: deepseek
+    providers:
+      kimi:
+        enabled: true
+        base-url: https://api.moonshot.cn/v1
+        api-key: ${KIMI_API_KEY:}
+        default-model: moonshot-v1-8k
+      deepseek:
+        enabled: true
+        base-url: https://api.deepseek.com/v1
+        api-key: ${DEEPSEEK_API_KEY:}
+        default-model: deepseek-chat
+      chatgpt:
+        enabled: true
+        base-url: https://api.openai.com/v1
+        api-key: ${OPENAI_API_KEY:}
+        default-model: gpt-4.1-mini
+      gemini:
+        enabled: true
+        base-url: https://generativelanguage.googleapis.com/v1beta/openai
+        api-key: ${GEMINI_API_KEY:}
+        default-model: gemini-2.5-flash
+      glm:
+        enabled: true
+        base-url: https://open.bigmodel.cn/api/paas/v4
+        api-key: ${GLM_API_KEY:}
+        default-model: glm-4-flash
+  storage:
+    root: storage/sessions
+  prompt:
+    extract-template: 你是规则抽取 Agent。请基于上传的规范文件提取文档排版、格式、标题层级、编号、图表要求，并按约定 schema 输出。
+    check-template: 你是格式检查 Agent。请依据完整规范.js 检查待检文件的排版和格式问题，输出错误位置、原因和整改建议，并用于生成批注。

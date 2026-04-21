@@ -1,0 +1,15 @@
+{
+  "sessionId" : "sess_20260421200848_1958f3",
+  "name" : "测试规则抽取",
+  "type" : "RULE_EXTRACTION",
+  "status" : "WAITING_CONFIRM",
+  "createdAt" : "2026-04-21T12:08:48.884005Z",
+  "updatedAt" : "2026-04-21T20:08:48.9588377+08:00",
+  "ruleVersion" : 0,
+  "standardFileName" : "standard.docx",
+  "targetFileName" : null,
+  "ruleSource" : "EXTRACTED",
+  "errorMessage" : null,
+  "agentProvider" : "DEEPSEEK",
+  "agentModel" : "deepseek-chat"
+}

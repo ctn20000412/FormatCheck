@@ -1,0 +1,78 @@
+{
+  "groups": [
+    {
+      "name": "app",
+      "type": "com.formatcheck.backend.config.AppProperties",
+      "sourceType": "com.formatcheck.backend.config.AppProperties"
+    },
+    {
+      "name": "app.agent",
+      "type": "com.formatcheck.backend.config.AppProperties$Agent",
+      "sourceType": "com.formatcheck.backend.config.AppProperties",
+      "sourceMethod": "public com.formatcheck.backend.config.AppProperties.Agent getAgent() "
+    },
+    {
+      "name": "app.prompt",
+      "type": "com.formatcheck.backend.config.AppProperties$Prompt",
+      "sourceType": "com.formatcheck.backend.config.AppProperties",
+      "sourceMethod": "public com.formatcheck.backend.config.AppProperties.Prompt getPrompt() "
+    },
+    {
+      "name": "app.storage",
+      "type": "com.formatcheck.backend.config.AppProperties$Storage",
+      "sourceType": "com.formatcheck.backend.config.AppProperties",
+      "sourceMethod": "public com.formatcheck.backend.config.AppProperties.Storage getStorage() "
+    }
+  ],
+  "properties": [
+    {
+      "name": "app.agent.base-url",
+      "type": "java.lang.String",
+      "sourceType": "com.formatcheck.backend.config.AppProperties$Agent"
+    },
+    {
+      "name": "app.agent.connect-timeout-seconds",
+      "type": "java.lang.Integer",
+      "sourceType": "com.formatcheck.backend.config.AppProperties$Agent"
+    },
+    {
+      "name": "app.agent.default-provider",
+      "type": "com.formatcheck.backend.domain.enums.AgentProvider",
+      "sourceType": "com.formatcheck.backend.config.AppProperties$Agent"
+    },
+    {
+      "name": "app.agent.mode",
+      "type": "java.lang.String",
+      "sourceType": "com.formatcheck.backend.config.AppProperties$Agent"
+    },
+    {
+      "name": "app.agent.providers",
+      "type": "java.util.Map<java.lang.String,com.formatcheck.backend.config.AppProperties$Provider>",
+      "sourceType": "com.formatcheck.backend.config.AppProperties$Agent"
+    },
+    {
+      "name": "app.agent.read-timeout-seconds",
+      "type": "java.lang.Integer",
+      "sourceType": "com.formatcheck.backend.config.AppProperties$Agent"
+    },
+    {
+      "name": "app.prompt.check-template",
+      "type": "java.lang.String",
+      "sourceType": "com.formatcheck.backend.config.AppProperties$Prompt"
+    },
+    {
+      "name": "app.prompt.extract-template",
+      "type": "java.lang.String",
+      "sourceType": "com.formatcheck.backend.config.AppProperties$Prompt"
+    },
+    {
+      "name": "app.storage.root",
+      "type": "java.lang.String",
+      "sourceType": "com.formatcheck.backend.config.AppProperties$Storage"
+    }
+  ],
+  "hints": [],
+  "ignored": {
+    "properties": []
+  }
+}
