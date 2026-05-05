@@ -23,7 +23,7 @@ public class FormatCheckController {
     public ApiResponse<CheckTaskResponse> runCheck(
             @RequestParam String provider,
             @RequestParam String model,
-            @RequestParam(defaultValue = "llm_direct") String workflow,
+            @RequestParam(defaultValue = "base_format") String workflow,
             @RequestParam MultipartFile standardFile,
             @RequestParam MultipartFile checkedFile,
             @RequestParam(required = false) String resultFolderName)

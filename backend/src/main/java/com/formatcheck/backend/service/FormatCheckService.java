@@ -100,8 +100,9 @@ public class FormatCheckService {
             return "full_check";
         }
         return switch (workflow) {
-            case "hard_format", "semantic_llm", "full_check" -> workflow;
-            case "llm_direct" -> "semantic_llm";
+            case "base_format", "language_semantic", "full_check" -> workflow;
+            case "hard_format" -> "base_format";
+            case "semantic_llm", "llm_direct" -> "language_semantic";
             case "hybrid", "compare" -> "full_check";
             default -> throw new IllegalArgumentException("Unsupported workflow: " + workflow);
         };

@@ -187,7 +187,7 @@ class RealLlmWorkflowTest(unittest.TestCase):
         self.assertTrue(result["success"])
         self.assertEqual(1, result["statistics"]["total_issues"])
         self.assertEqual("issue-1", result["issues"][0]["id"])
-        self.assertEqual(2, len(FakeDeepSeekHandler.calls))
+        self.assertEqual(3, len(FakeDeepSeekHandler.calls))
         self.assertEqual("/chat/completions", FakeDeepSeekHandler.calls[0]["path"])
         self.assertEqual("Bearer test-key", FakeDeepSeekHandler.calls[0]["authorization"])
         self.assertEqual("deepseek-v4-flash", FakeDeepSeekHandler.calls[0]["payload"]["model"])
@@ -197,8 +197,12 @@ class RealLlmWorkflowTest(unittest.TestCase):
             FakeDeepSeekHandler.calls[0]["payload"]["messages"][0]["content"],
         )
         self.assertIn(
-            "strict academic document-format checker",
+            "复杂格式规则解释 Agent",
             FakeDeepSeekHandler.calls[1]["payload"]["messages"][0]["content"],
+        )
+        self.assertIn(
+            "语言语义拓展检查 Agent",
+            FakeDeepSeekHandler.calls[2]["payload"]["messages"][0]["content"],
         )
         self.assertIn(
             "必须使用中文",
@@ -245,18 +249,19 @@ class RealLlmWorkflowTest(unittest.TestCase):
         )
 
         self.assertTrue(result["success"])
-        self.assertEqual(2, len(FakeDeepSeekHandler.calls))
-        check_messages = [call["payload"]["messages"][1]["content"] for call in FakeDeepSeekHandler.calls[1:]]
+        self.assertEqual(3, len(FakeDeepSeekHandler.calls))
+        language_message = FakeDeepSeekHandler.calls[2]["payload"]["messages"][1]["content"]
+        check_messages = [language_message]
         self.assertTrue(any("全文最后唯一标记" in message for message in check_messages))
-        self.assertTrue(all("python-docx" in message for message in check_messages))
-        self.assertTrue(all("location.paragraph_index" in message for message in check_messages))
-        self.assertTrue(all("anchor_text" in message for message in check_messages))
+        self.assertIn("python-docx", language_message)
+        self.assertIn("location.paragraph_index", language_message)
+        self.assertIn("anchor_text", language_message)
         self.assertTrue(all("全文读取概况 JSON" in message for message in check_messages))
         with open(self.root / "long-paper-result" / "检测结果" / "format_check_result.json", encoding="utf-8") as check_file:
             saved_check = json.load(check_file)
         self.assertEqual(1, saved_check["paper_analysis"]["checked_chunk_count"])
         self.assertEqual(len(long_text), saved_check["paper_analysis"]["checked_text_chars"])
-        self.assertEqual(1, saved_check["llm_raw"]["chunk_count"])
+        self.assertEqual(1, saved_check["llm_raw"]["language_semantic"]["chunk_count"])
 
     def test_cli_prints_stream_log_to_stderr_and_final_json_to_stdout(self):
         standard = self.root / "simple_standard.md"
@@ -298,9 +303,10 @@ class RealLlmWorkflowTest(unittest.TestCase):
         stderr = completed.stderr.decode("utf-8", errors="replace")
         stdout_payload = json.loads(stdout)
         self.assertTrue(stdout_payload["success"])
+        self.assertIn("[agent2_complex_format_explainer] 回答片段", stderr)
+        self.assertIn("[agent3_language_semantic_checker] 回答片段", stderr)
         self.assertIn("[agent1_extract_format_rules] 提示词", stderr)
         self.assertIn("[agent1_extract_format_rules] 思考片段", stderr)
-        self.assertIn("[agent2_check_paper_format] 回答片段", stderr)
 
 
 if __name__ == "__main__":

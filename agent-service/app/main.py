@@ -10,6 +10,7 @@ import subprocess
 import sys
 import tempfile
 import zipfile
+from collections import Counter
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
@@ -42,7 +43,16 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 EXTRACT_RULE_PROMPT_PATH = PROJECT_ROOT / "skills" / "extract-format-rules" / "references" / "extract_rule_prompt.md"
 FORMAT_CHECK_PROMPT_PATH = PROJECT_ROOT / "skills" / "check-paper-format" / "references" / "format_check_prompt.md"
 MAX_LLM_TEXT_CHARS = 10000
-SUPPORTED_WORKFLOWS = {"hard_format", "semantic_llm", "full_check", "llm_direct", "hybrid", "compare"}
+SUPPORTED_WORKFLOWS = {
+    "base_format",
+    "language_semantic",
+    "full_check",
+    "hard_format",
+    "semantic_llm",
+    "llm_direct",
+    "hybrid",
+    "compare",
+}
 W_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
 R_NS = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
 PKG_REL_NS = "http://schemas.openxmlformats.org/package/2006/relationships"
@@ -554,23 +564,89 @@ def parse_paragraphs(
                 )
             )
 
-        paragraphs.append(
-            compact_dict(
-                {
-                    "index": index,
-                    "text": text_from_word_element(paragraph),
-                    "style_id": style_id,
-                    "style_name": styles.get("styles_by_id", {}).get(style_id, {}).get("name"),
-                    "direct_paragraph_properties": direct_p_props,
-                    "effective_paragraph_properties": merge_dicts(
-                        style_props.get("paragraph_properties"), direct_p_props
-                    ),
-                    "numbering": numbering_props,
-                    "runs": runs,
-                }
-            )
+        paragraph_item = compact_dict(
+            {
+                "index": index,
+                "text": text_from_word_element(paragraph),
+                "style_id": style_id,
+                "style_name": styles.get("styles_by_id", {}).get(style_id, {}).get("name"),
+                "direct_paragraph_properties": direct_p_props,
+                "effective_paragraph_properties": merge_dicts(
+                    style_props.get("paragraph_properties"), direct_p_props
+                ),
+                "numbering": numbering_props,
+                "runs": runs,
+            }
         )
+        paragraph_item["content_roles"] = classify_paragraph_content_roles(paragraph_item)
+        paragraphs.append(compact_dict(paragraph_item))
     return paragraphs
+
+
+def compact_text(value: Any) -> str:
+    return re.sub(r"\s+", "", str(value or "")).lower()
+
+
+def infer_heading_role(paragraph: dict[str, Any]) -> str | None:
+    style_id = compact_text(paragraph.get("style_id"))
+    style_name = compact_text(paragraph.get("style_name"))
+    text = str(paragraph.get("text") or "").strip()
+    effective = paragraph.get("effective_paragraph_properties") or {}
+    outline_level = str(effective.get("outline_level") or "")
+    numbering = paragraph.get("numbering") or {}
+    ilvl = str(numbering.get("ilvl") or "")
+
+    heading_sources = [style_id, style_name]
+    for level in range(1, 10):
+        if any(f"heading{level}" in source or f"标题{level}" in source for source in heading_sources):
+            return f"heading_{level}"
+    if outline_level.isdigit():
+        return f"heading_{int(outline_level) + 1}"
+    if ilvl.isdigit() and re.match(r"^(第.+章|\d+(?:\.\d+){0,2})(\s+|[、.．])", text):
+        return f"heading_{int(ilvl) + 1}"
+    if re.match(r"^第[一二三四五六七八九十百千万\d]+章\b", text):
+        return "heading_1"
+    if re.match(r"^\d+\.\d+\.\d+(\s+|[、.．])", text):
+        return "heading_3"
+    if re.match(r"^\d+\.\d+(\s+|[、.．])", text):
+        return "heading_2"
+    if re.match(r"^\d+(\s+|[、.．])", text) and len(text) <= 80:
+        return "heading_1"
+    return None
+
+
+def classify_paragraph_content_roles(paragraph: dict[str, Any]) -> list[str]:
+    text = str(paragraph.get("text") or "").strip()
+    normalized = compact_text(text)
+    roles: list[str] = []
+    if not text:
+        return ["blank"]
+
+    if normalized in {"目录", "目次"} or re.match(r"^.{2,80}[.\s·…]{2,}\d+$", text):
+        roles.append("toc")
+    if normalized in {"摘要", "中文摘要", "abstract"} or "关键词" in text or "key words" in normalized:
+        roles.append("abstract")
+    if normalized.startswith("参考文献") or re.match(r"^\[\d+\]", text):
+        roles.append("reference")
+    if re.match(r"^(表|table)\s*\d+", text, flags=re.IGNORECASE):
+        roles.append("table_caption")
+    if re.match(r"^(图|figure|fig\.)\s*\d+", text, flags=re.IGNORECASE):
+        roles.append("figure_caption")
+    if re.search(r"[\(\uff08]\s*\d+(?:[.-]\d+)?\s*[\)\uff09]\s*$", text) or any(
+        field.get("instruction", "").strip().startswith("EQ")
+        for run in paragraph.get("runs") or []
+        for field in run.get("fields") or []
+        if isinstance(field, dict)
+    ):
+        roles.append("formula")
+
+    heading_role = infer_heading_role(paragraph)
+    if heading_role:
+        roles.extend(["heading", heading_role])
+
+    if not roles:
+        roles.append("body")
+    return sorted(set(roles))
 
 
 def parse_table_borders(tbl_pr: ET.Element | None) -> dict[str, Any]:
@@ -1115,7 +1191,9 @@ def build_comment_text(issue: dict[str, Any]) -> str:
 def normalize_workflow(value: Any) -> str:
     workflow = str(value or "full_check").strip() or "full_check"
     aliases = {
-        "llm_direct": "semantic_llm",
+        "hard_format": "base_format",
+        "semantic_llm": "language_semantic",
+        "llm_direct": "language_semantic",
         "hybrid": "full_check",
         "compare": "full_check",
     }
@@ -1245,6 +1323,39 @@ def build_deterministic_issue(rule: dict[str, Any], paragraph: dict[str, Any], a
     )
 
 
+def build_python_issue(
+    rule: dict[str, Any],
+    category: str,
+    reason: str,
+    expected: str,
+    suggestion: str,
+    location: dict[str, Any] | None = None,
+    anchor_text: str | None = None,
+    manual: bool = False,
+) -> dict[str, Any]:
+    rule_id = rule.get("rule_id") or rule.get("id") or "R000"
+    location = location or {}
+    location.setdefault("page", None)
+    location.setdefault("section", None)
+    location.setdefault("paragraph_index", None)
+    location.setdefault("object_type", category)
+    quote = anchor_text or str(location.get("quote") or "")[:60]
+    location.setdefault("quote", quote)
+    return {
+        "issue_id": f"D-{rule_id}-{category}-{location.get('paragraph_index') or location.get('section') or location.get('object_type')}",
+        "rule_id": rule_id,
+        "category": category,
+        "severity": rule.get("severity") or "medium",
+        "reason": reason,
+        "expected": expected,
+        "suggestion": suggestion,
+        "need_manual_confirmation": manual,
+        "source": "python_hard_checker",
+        "location": location,
+        "anchor_text": quote,
+    }
+
+
 def contains_cjk(text: str) -> bool:
     return any("\u4e00" <= char <= "\u9fff" for char in text)
 
@@ -1277,6 +1388,448 @@ def select_run_font_for_rule(run: dict[str, Any], rule_script: str) -> tuple[str
     return effective.get("east_asia_font") or effective.get("ascii_font") or effective.get("hansi_font"), bool(text)
 
 
+def rule_scope_text(rule: dict[str, Any]) -> str:
+    return " ".join(
+        str(rule.get(key) or "")
+        for key in ("scope", "rule_name", "category", "description", "requirement", "check_logic")
+    )
+
+
+def normalize_rule_target_roles(rule: dict[str, Any]) -> set[str]:
+    text = compact_text(rule_scope_text(rule))
+    roles: set[str] = set()
+    if not text:
+        return roles
+    if any(keyword in text for keyword in ("整篇", "全文", "whole", "entiredocument", "alldocument")):
+        roles.add("all")
+    if any(keyword in text for keyword in ("正文", "body")):
+        roles.add("body")
+    if any(keyword in text for keyword in ("中文摘要", "英文摘要", "摘要", "abstract", "关键词", "keywords")):
+        roles.add("abstract")
+    if any(keyword in text for keyword in ("目录", "toc", "tableofcontents")):
+        roles.add("toc")
+    if any(keyword in text for keyword in ("参考文献", "bibliography", "references")):
+        roles.add("reference")
+    if any(keyword in text for keyword in ("一级标题", "章标题", "heading1", "first-levelheading", "level1heading")):
+        roles.add("heading_1")
+    if any(keyword in text for keyword in ("二级标题", "节标题", "heading2", "second-levelheading", "level2heading")):
+        roles.add("heading_2")
+    if any(keyword in text for keyword in ("三级标题", "条标题", "heading3", "third-levelheading", "level3heading")):
+        roles.add("heading_3")
+    if "标题" in text or "heading" in text:
+        roles.add("heading")
+    if any(keyword in text for keyword in ("表格标题", "表题", "tablecaption")):
+        roles.add("table_caption")
+    elif any(keyword in text for keyword in ("表格", "表内", "table")):
+        roles.add("table")
+    if any(keyword in text for keyword in ("图片标题", "图题", "figurecaption", "figcaption")):
+        roles.add("figure_caption")
+    elif any(keyword in text for keyword in ("图片", "插图", "figure", "image")):
+        roles.add("figure")
+    if any(keyword in text for keyword in ("公式", "formula", "equation")):
+        roles.add("formula")
+    if any(keyword in text for keyword in ("页眉", "header")):
+        roles.add("header")
+    if any(keyword in text for keyword in ("页脚", "footer", "页码", "pagenumber")):
+        roles.add("footer")
+    return roles
+
+
+def paragraph_matches_rule_scope(paragraph: dict[str, Any], rule_roles: set[str]) -> bool:
+    if not rule_roles or "all" in rule_roles:
+        return True
+    paragraph_roles = set(paragraph.get("content_roles") or classify_paragraph_content_roles(paragraph))
+    if "heading" in rule_roles and "heading" in paragraph_roles:
+        return True
+    if rule_roles.intersection(paragraph_roles):
+        return True
+    # Table and figure object rules are handled by dedicated checkers. Do not apply them to every paragraph.
+    non_paragraph_roles = {"table", "figure", "header", "footer"}
+    if rule_roles and rule_roles.issubset(non_paragraph_roles):
+        return False
+    return False
+
+
+def paragraphs_matching_rule_scope(rule: dict[str, Any], paragraphs: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    rule_roles = normalize_rule_target_roles(rule)
+    return [paragraph for paragraph in paragraphs if paragraph_matches_rule_scope(paragraph, rule_roles)]
+
+
+FONT_SIZE_NAME_TO_PT = {
+    "初号": 42.0,
+    "小初": 36.0,
+    "一号": 26.0,
+    "小一": 24.0,
+    "二号": 22.0,
+    "小二": 18.0,
+    "三号": 16.0,
+    "小三": 15.0,
+    "四号": 14.0,
+    "小四": 12.0,
+    "五号": 10.5,
+    "小五": 9.0,
+    "六号": 7.5,
+    "小六": 6.5,
+    "七号": 5.5,
+    "八号": 5.0,
+}
+
+
+def parse_expected_font_size_pt(rule_text: str) -> float | None:
+    for name in sorted(FONT_SIZE_NAME_TO_PT, key=len, reverse=True):
+        if name in rule_text:
+            return FONT_SIZE_NAME_TO_PT[name]
+    match = re.search(r"(\d+(?:\.\d+)?)\s*(?:pt|磅)", rule_text, flags=re.IGNORECASE)
+    return float(match.group(1)) if match else None
+
+
+def parse_expected_alignment(rule_text: str) -> str | None:
+    normalized = rule_text.lower()
+    if "两端对齐" in rule_text or "justify" in normalized:
+        return "both"
+    if "居中" in rule_text or "center" in normalized or "centre" in normalized:
+        return "center"
+    if "右对齐" in rule_text or "居右" in rule_text or "right" in normalized:
+        return "right"
+    if "左对齐" in rule_text or "居左" in rule_text or "left" in normalized:
+        return "left"
+    return None
+
+
+def same_number(actual: Any, expected: float, tolerance: float = 0.15) -> bool:
+    try:
+        return abs(float(actual) - expected) <= tolerance
+    except (TypeError, ValueError):
+        return False
+
+
+def format_pt(value: Any) -> str:
+    try:
+        return f"{float(value):g} pt"
+    except (TypeError, ValueError):
+        return str(value)
+
+
+def parse_expected_mm_values(rule_text: str) -> dict[str, float]:
+    values: dict[str, float] = {}
+    for key, aliases in {
+        "top_margin_mm": ["上", "上边距", "top"],
+        "bottom_margin_mm": ["下", "下边距", "bottom"],
+        "left_margin_mm": ["左", "左边距", "left"],
+        "right_margin_mm": ["右", "右边距", "right"],
+        "header_distance_mm": ["页眉", "header"],
+        "footer_distance_mm": ["页脚", "footer"],
+    }.items():
+        for alias in aliases:
+            match = re.search(rf"{re.escape(alias)}\s*(?:边距|距)?\s*(?:为|[:：])?\s*(\d+(?:\.\d+)?)\s*mm", rule_text, re.IGNORECASE)
+            if match:
+                values[key] = float(match.group(1))
+                break
+    return values
+
+
+def parse_expected_line_value(rule_text: str) -> int | None:
+    if "1.5" in rule_text or "1．5" in rule_text:
+        return 360
+    if "单倍" in rule_text or "single" in rule_text.lower():
+        return 240
+    return None
+
+
+def parse_expected_spacing_points(rule_text: str) -> dict[str, float]:
+    values: dict[str, float] = {}
+    if "段前" in rule_text:
+        match = re.search(r"段前\s*(?:、?段后)?\s*(?:各)?\s*(?:设为|为)?\s*(\d+(?:\.\d+)?)\s*(行|pt|磅)?", rule_text)
+        if match:
+            value = float(match.group(1))
+            values["before_pt"] = value * 12 if match.group(2) == "行" else value
+    if "段后" in rule_text:
+        match = re.search(r"段后\s*(?:各)?\s*(?:设为|为)?\s*(\d+(?:\.\d+)?)\s*(行|pt|磅)?", rule_text)
+        if match:
+            value = float(match.group(1))
+            values["after_pt"] = value * 12 if match.group(2) == "行" else value
+    if "段前、段后无空行" in rule_text or "段前段后间距是否为0" in rule_text or "段前0" in rule_text:
+        values.setdefault("before_pt", 0.0)
+    if "段前、段后无空行" in rule_text or "段前段后间距是否为0" in rule_text or "段后0" in rule_text:
+        values.setdefault("after_pt", 0.0)
+    return values
+
+
+def parse_expected_first_line_indent_pt(rule_text: str) -> float | None:
+    match = re.search(r"首行缩进\s*(\d+(?:\.\d+)?)\s*字符", rule_text)
+    if match:
+        return float(match.group(1)) * 12.0
+    match = re.search(r"首行缩进\s*(\d+(?:\.\d+)?)\s*(pt|磅)", rule_text, re.IGNORECASE)
+    if match:
+        return float(match.group(1))
+    return None
+
+
+def check_page_setup_rules(rules: list[dict[str, Any]], docx_evidence: dict[str, Any]) -> list[dict[str, Any]]:
+    issues: list[dict[str, Any]] = []
+    sections = docx_evidence.get("sections") or []
+    if not sections:
+        return issues
+    for rule in rules:
+        if not rule_mentions_any(rule, ["页边距", "纸张", "a4", "margin", "页眉", "页脚"]):
+            continue
+        rule_text = json.dumps(rule, ensure_ascii=False)
+        expected_mm = parse_expected_mm_values(rule_text)
+        for section in sections:
+            section_index = section.get("index")
+            if "a4" in rule_text.lower() or "A4" in rule_text:
+                width = section.get("page_width_mm")
+                height = section.get("page_height_mm")
+                if width and height and not (same_number(width, 210.0, 2.0) and same_number(height, 297.0, 2.0)):
+                    issues.append(
+                        build_python_issue(
+                            rule,
+                            "page_setup",
+                            f"程序读取到纸张尺寸为 {width}mm x {height}mm",
+                            "A4 纸张约为 210mm x 297mm",
+                            "请将页面纸张设置为 A4。",
+                            {"section": section_index, "object_type": "page"},
+                        )
+                    )
+            for key, expected in expected_mm.items():
+                actual = section.get(key)
+                if actual is not None and not same_number(actual, expected, 1.0):
+                    issues.append(
+                        build_python_issue(
+                            rule,
+                            "page_setup",
+                            f"程序读取到 {key} 为 {actual}mm",
+                            f"规范要求为 {expected}mm",
+                            "请按规范调整页面设置。",
+                            {"section": section_index, "object_type": "page"},
+                        )
+                    )
+    return issues
+
+
+def check_paragraph_spacing_and_indent_rules(rules: list[dict[str, Any]], docx_evidence: dict[str, Any]) -> list[dict[str, Any]]:
+    issues: list[dict[str, Any]] = []
+    paragraphs = docx_evidence.get("paragraphs") or []
+    for rule in rules:
+        if not rule_mentions_any(rule, ["行距", "段前", "段后", "缩进", "spacing", "indent"]):
+            continue
+        rule_text = json.dumps(rule, ensure_ascii=False)
+        expected_line = parse_expected_line_value(rule_text)
+        expected_spacing = parse_expected_spacing_points(rule_text)
+        expected_indent = parse_expected_first_line_indent_pt(rule_text)
+        for paragraph in paragraphs_matching_rule_scope(rule, paragraphs):
+            paragraph_props = paragraph.get("effective_paragraph_properties") or {}
+            spacing = paragraph_props.get("spacing") or {}
+            indent = paragraph_props.get("indent") or {}
+            if expected_line is not None and spacing.get("line") is not None:
+                try:
+                    actual_line = int(spacing.get("line"))
+                except (TypeError, ValueError):
+                    actual_line = None
+                if actual_line is not None and actual_line != expected_line:
+                    issues.append(
+                        build_python_issue(
+                            rule,
+                            "paragraph_format",
+                            f"程序读取到行距值为 {actual_line}",
+                            f"规范要求行距值为 {expected_line}",
+                            "请按规范调整该段落行距。",
+                            {"paragraph_index": paragraph.get("index"), "object_type": "paragraph", "quote": str(paragraph.get("text") or "")[:60]},
+                            str(paragraph.get("text") or "")[:60],
+                        )
+                    )
+            for key, expected in expected_spacing.items():
+                actual = spacing.get(key)
+                if actual is not None and not same_number(actual, expected, 0.5):
+                    issues.append(
+                        build_python_issue(
+                            rule,
+                            "paragraph_format",
+                            f"程序读取到 {key} 为 {format_pt(actual)}",
+                            f"规范要求为 {format_pt(expected)}",
+                            "请按规范调整段前段后间距。",
+                            {"paragraph_index": paragraph.get("index"), "object_type": "paragraph", "quote": str(paragraph.get("text") or "")[:60]},
+                            str(paragraph.get("text") or "")[:60],
+                        )
+                    )
+            actual_indent = indent.get("first_line_pt")
+            if expected_indent is not None and actual_indent is not None and not same_number(actual_indent, expected_indent, 1.5):
+                issues.append(
+                    build_python_issue(
+                        rule,
+                        "paragraph_format",
+                        f"程序读取到首行缩进为 {format_pt(actual_indent)}",
+                        f"规范要求首行缩进约为 {format_pt(expected_indent)}",
+                        "请按规范调整首行缩进。",
+                        {"paragraph_index": paragraph.get("index"), "object_type": "paragraph", "quote": str(paragraph.get("text") or "")[:60]},
+                        str(paragraph.get("text") or "")[:60],
+                    )
+                )
+    return issues
+
+
+def check_table_format_rules(rules: list[dict[str, Any]], docx_evidence: dict[str, Any]) -> list[dict[str, Any]]:
+    issues: list[dict[str, Any]] = []
+    tables = docx_evidence.get("tables") or []
+    paragraphs = docx_evidence.get("paragraphs") or []
+    table_captions = [p for p in paragraphs if "table_caption" in set(p.get("content_roles") or [])]
+    for rule in rules:
+        if not rule_mentions_any(rule, ["表格", "表题", "三线表", "table"]):
+            continue
+        if rule_mentions_any(rule, ["表题", "编号", "表格标题"]):
+            for caption in table_captions:
+                text = str(caption.get("text") or "")
+                props = caption.get("effective_paragraph_properties") or {}
+                if "居中" in json.dumps(rule, ensure_ascii=False) and (props.get("alignment") or "left") != "center":
+                    issues.append(build_python_issue(rule, "table_format", "表题未居中", "表题应居中", "请将表题设置为居中。", {"paragraph_index": caption.get("index"), "object_type": "table_caption", "quote": text[:60]}, text[:60]))
+                if re.search(r"表\s*\d+(?:[-.]\d+)?", text) is None:
+                    issues.append(build_python_issue(rule, "table_format", "表题编号格式不符合常见要求", "表题编号应类似 表2-1", "请按规范修改表题编号。", {"paragraph_index": caption.get("index"), "object_type": "table_caption", "quote": text[:60]}, text[:60]))
+        if rule_mentions_any(rule, ["三线表", "边线", "边框"]):
+            for table in tables:
+                borders = table.get("borders") or {}
+                has_vertical = any((borders.get(name) or {}).get("val") not in {None, "nil", "none"} for name in ("left", "right", "insideV"))
+                missing_horizontal = not borders.get("top") or not borders.get("bottom")
+                if has_vertical or missing_horizontal:
+                    issues.append(
+                        build_python_issue(
+                            rule,
+                            "table_format",
+                            "程序读取到表格边框不符合三线表特征",
+                            "三线表通常应有顶线、底线和必要内部横线，避免竖线",
+                            "请按三线表规范调整表格边框。",
+                            {"object_type": "table", "section": table.get("index")},
+                        )
+                    )
+    return issues
+
+
+def check_figure_format_rules(rules: list[dict[str, Any]], docx_evidence: dict[str, Any]) -> list[dict[str, Any]]:
+    issues: list[dict[str, Any]] = []
+    images = docx_evidence.get("images") or []
+    paragraphs = docx_evidence.get("paragraphs") or []
+    figure_captions = [p for p in paragraphs if "figure_caption" in set(p.get("content_roles") or [])]
+    for rule in rules:
+        if not rule_mentions_any(rule, ["图片", "插图", "图题", "figure", "image"]):
+            continue
+        if images and len(figure_captions) < len(images):
+            issues.append(build_python_issue(rule, "figure_format", "图片数量多于可识别图题数量", "每张图片应有图题", "请为图片补充规范图题。", {"object_type": "figure"}))
+        for caption in figure_captions:
+            text = str(caption.get("text") or "")
+            props = caption.get("effective_paragraph_properties") or {}
+            if "居中" in json.dumps(rule, ensure_ascii=False) and (props.get("alignment") or "left") != "center":
+                issues.append(build_python_issue(rule, "figure_format", "图题未居中", "图题应居中", "请将图题设置为居中。", {"paragraph_index": caption.get("index"), "object_type": "figure_caption", "quote": text[:60]}, text[:60]))
+            if re.search(r"图\s*\d+(?:[-.]\d+)?", text) is None:
+                issues.append(build_python_issue(rule, "figure_format", "图题编号格式不符合常见要求", "图题编号应类似 图2-1", "请按规范修改图题编号。", {"paragraph_index": caption.get("index"), "object_type": "figure_caption", "quote": text[:60]}, text[:60]))
+        if rule_mentions_any(rule, ["清晰度", "dpi", "分辨率"]):
+            issues.append(build_python_issue(rule, "figure_format", "DOCX 静态证据未提供可靠图片 DPI", "图片清晰度应满足规范", "请人工确认图片分辨率或使用渲染/图像元数据检查。", {"object_type": "figure"}, manual=True))
+    return issues
+
+
+def check_header_footer_rules(rules: list[dict[str, Any]], docx_evidence: dict[str, Any]) -> list[dict[str, Any]]:
+    issues: list[dict[str, Any]] = []
+    headers_footers = docx_evidence.get("headers_footers") or {}
+    headers = headers_footers.get("headers") or []
+    footers = headers_footers.get("footers") or []
+    for rule in rules:
+        if not rule_mentions_any(rule, ["页眉", "页脚", "页码", "header", "footer", "page number"]):
+            continue
+        wants_header_content = rule_mentions_any(rule, ["页眉内容", "页眉应有", "奇数页", "偶数页", "论文题目", "章标题", "header content"])
+        wants_header_font = rule_mentions_any(rule, ["页眉字体", "页眉用", "header font"])
+        wants_footer_page = rule_mentions_any(rule, ["页码", "page number"])
+        wants_footer_content = rule_mentions_any(rule, ["页脚内容", "footer content"])
+        if wants_header_content:
+            if not headers:
+                issues.append(build_python_issue(rule, "header_footer", "文档中未读取到页眉", "规范要求存在页眉", "请按规范设置页眉。", {"object_type": "header"}))
+            for header in headers:
+                if not str(header.get("text") or "").strip():
+                    issues.append(build_python_issue(rule, "header_footer", "页眉内容为空", "页眉应包含规范要求的内容", "请补充页眉内容。", {"object_type": "header", "quote": ""}))
+        if wants_header_font:
+            issues.append(build_python_issue(rule, "header_footer", "当前页眉解析只读取到文本和域，未稳定读取页眉字体字号", "页眉字体字号应符合规范", "请人工确认页眉字体字号，或后续扩展页眉段落格式解析。", {"object_type": "header"}, manual=True))
+        if wants_footer_page or wants_footer_content:
+            if not footers:
+                issues.append(build_python_issue(rule, "header_footer", "文档中未读取到页脚", "规范要求存在页脚或页码", "请按规范设置页脚页码。", {"object_type": "footer"}))
+                continue
+            for footer in footers:
+                fields = footer.get("fields") or []
+                has_page_field = any("PAGE" in str(field.get("instruction") or "").upper() for field in fields if isinstance(field, dict))
+                if wants_footer_page and not has_page_field:
+                    issues.append(build_python_issue(rule, "header_footer", "页脚中未读取到 PAGE 页码域", "页脚应包含页码", "请插入规范要求的页码。", {"object_type": "footer", "quote": str(footer.get("text") or "")[:60]}))
+    return issues
+
+
+def extract_reference_numbers(paragraphs: list[dict[str, Any]]) -> set[int]:
+    refs: set[int] = set()
+    for paragraph in paragraphs:
+        if "reference" not in set(paragraph.get("content_roles") or []):
+            continue
+        match = re.match(r"\s*\[(\d+)\]", str(paragraph.get("text") or ""))
+        if match:
+            refs.add(int(match.group(1)))
+    return refs
+
+
+def extract_body_citation_numbers(paragraphs: list[dict[str, Any]]) -> list[tuple[int, int, str]]:
+    citations: list[tuple[int, int, str]] = []
+    for paragraph in paragraphs:
+        if "reference" in set(paragraph.get("content_roles") or []):
+            continue
+        text = str(paragraph.get("text") or "")
+        for citation in re.findall(r"\[(\d+(?:\s*[-,，]\s*\d+)*)\]", text):
+            for number in re.findall(r"\d+", citation):
+                citations.append((int(number), int(paragraph.get("index") or 0), text[:60]))
+    return citations
+
+
+def check_reference_format_rules(rules: list[dict[str, Any]], docx_evidence: dict[str, Any]) -> list[dict[str, Any]]:
+    issues: list[dict[str, Any]] = []
+    paragraphs = docx_evidence.get("paragraphs") or []
+    refs = extract_reference_numbers(paragraphs)
+    citations = extract_body_citation_numbers(paragraphs)
+    for rule in rules:
+        if not rule_mentions_any(rule, ["参考文献", "引用", "citation", "reference"]):
+            continue
+        for number, paragraph_index, quote in citations:
+            if refs and number not in refs:
+                issues.append(build_python_issue(rule, "citation_reference", f"正文引用 [{number}] 未在参考文献列表中找到", "正文引用编号应能对应参考文献列表", "请补充对应参考文献或修改引用编号。", {"paragraph_index": paragraph_index, "object_type": "citation", "quote": quote}, quote))
+        for paragraph in paragraphs:
+            if "reference" in set(paragraph.get("content_roles") or []) and not re.match(r"\s*\[\d+\]", str(paragraph.get("text") or "")):
+                text = str(paragraph.get("text") or "")
+                issues.append(build_python_issue(rule, "citation_reference", "参考文献列表项缺少 [编号] 格式", "参考文献应以 [编号] 开头", "请按规范补充参考文献编号。", {"paragraph_index": paragraph.get("index"), "object_type": "reference", "quote": text[:60]}, text[:60]))
+    return issues
+
+
+def check_formula_structural_rules(rules: list[dict[str, Any]], docx_evidence: dict[str, Any]) -> list[dict[str, Any]]:
+    issues: list[dict[str, Any]] = []
+    formulas = [p for p in docx_evidence.get("paragraphs") or [] if "formula" in set(p.get("content_roles") or [])]
+    for rule in rules:
+        if not rule_mentions_any(rule, ["公式", "formula", "equation"]):
+            continue
+        rule_text = json.dumps(rule, ensure_ascii=False)
+        for paragraph in formulas:
+            text = str(paragraph.get("text") or "")
+            props = paragraph.get("effective_paragraph_properties") or {}
+            if "居中" in rule_text and (props.get("alignment") or "left") != "center":
+                issues.append(build_python_issue(rule, "formula_format", "公式段落未居中", "公式应居中编排", "请将公式段落设置为居中。", {"paragraph_index": paragraph.get("index"), "object_type": "formula", "quote": text[:60]}, text[:60]))
+            has_any_formula_number = re.search(r"[\(\uff08]\s*\d+(?:[-.]\d+)?\s*[\)\uff09]", text)
+            has_chapter_formula_number = re.search(r"[\(\uff08]\s*\d+[-.]\d+\s*[\)\uff09]", text)
+            if rule_mentions_any(rule, ["编号", "number"]) and has_any_formula_number and not has_chapter_formula_number:
+                issues.append(build_python_issue(rule, "formula_format", "公式编号格式不符合章号-序号格式", "公式编号应类似 (3-1)", "请按规范修改公式编号。", {"paragraph_index": paragraph.get("index"), "object_type": "formula", "quote": text[:60]}, text[:60]))
+    return issues
+
+
+def run_structural_format_checks(normalized_rules: list[dict[str, Any]], docx_evidence: dict[str, Any]) -> list[dict[str, Any]]:
+    python_rules = filter_rules_by_check_method(normalized_rules, "python")
+    issues: list[dict[str, Any]] = []
+    issues.extend(check_page_setup_rules(python_rules, docx_evidence))
+    issues.extend(check_paragraph_spacing_and_indent_rules(python_rules, docx_evidence))
+    issues.extend(check_table_format_rules(python_rules, docx_evidence))
+    issues.extend(check_figure_format_rules(python_rules, docx_evidence))
+    issues.extend(check_header_footer_rules(python_rules, docx_evidence))
+    issues.extend(check_reference_format_rules(python_rules, docx_evidence))
+    issues.extend(check_formula_structural_rules(python_rules, docx_evidence))
+    return issues
+
+
 def run_deterministic_checks(normalized_rules: list[dict[str, Any]], docx_evidence: dict[str, Any]) -> list[dict[str, Any]]:
     issues: list[dict[str, Any]] = []
     paragraphs = docx_evidence.get("paragraphs") or []
@@ -1292,20 +1845,43 @@ def run_deterministic_checks(normalized_rules: list[dict[str, Any]], docx_eviden
             ),
             None,
         )
-        if not expected_font:
+        expected_font_size = parse_expected_font_size_pt(rule_text)
+        expected_alignment = parse_expected_alignment(rule_text)
+        if not expected_font and expected_font_size is None and not expected_alignment:
             continue
         rule_script = expected_font_script(rule_text, expected_font)
-        for paragraph in paragraphs:
+        for paragraph in paragraphs_matching_rule_scope(rule, paragraphs):
             if not isinstance(paragraph, dict):
                 continue
+            paragraph_props = paragraph.get("effective_paragraph_properties") or {}
+            if expected_alignment:
+                actual_alignment = paragraph_props.get("alignment") or "left"
+                if actual_alignment != expected_alignment:
+                    issues.append(build_deterministic_issue(rule, paragraph, str(actual_alignment), expected_alignment))
+                    if len(issues) >= 200:
+                        return issues
+                    continue
             runs = paragraph.get("runs") or []
             for run in runs:
-                actual_font, should_check = select_run_font_for_rule(run, rule_script)
-                if not should_check:
-                    continue
-                if actual_font and expected_font not in str(actual_font):
-                    issues.append(build_deterministic_issue(rule, paragraph, str(actual_font), expected_font))
-                    break
+                if expected_font:
+                    actual_font, should_check = select_run_font_for_rule(run, rule_script)
+                    if not should_check:
+                        continue
+                    if actual_font and expected_font not in str(actual_font):
+                        issues.append(build_deterministic_issue(rule, paragraph, str(actual_font), expected_font))
+                        break
+                if expected_font_size is not None and str(run.get("text") or "").strip():
+                    actual_size = (run.get("effective_properties") or {}).get("font_size_pt")
+                    if actual_size is not None and not same_number(actual_size, expected_font_size):
+                        issues.append(
+                            build_deterministic_issue(
+                                rule,
+                                paragraph,
+                                format_pt(actual_size),
+                                format_pt(expected_font_size),
+                            )
+                        )
+                        break
             if len(issues) >= 200:
                 return issues
     return issues
@@ -1314,6 +1890,124 @@ def run_deterministic_checks(normalized_rules: list[dict[str, Any]], docx_eviden
 def rule_mentions_any(rule: dict[str, Any], keywords: list[str]) -> bool:
     text = json.dumps(rule, ensure_ascii=False).lower()
     return any(keyword.lower() in text for keyword in keywords)
+
+
+IMPLEMENTED_PYTHON_CHECKS = [
+    "font_family",
+    "font_size",
+    "paragraph_alignment",
+    "paragraph_spacing",
+    "paragraph_indent",
+    "page_setup",
+    "header",
+    "footer_page_number",
+    "table_format",
+    "figure_format",
+    "citation_reference",
+    "formula_missing_number",
+    "toc_rendered_page_consistency",
+]
+
+
+def infer_required_checker_names(rule: dict[str, Any]) -> set[str]:
+    text = json.dumps(rule, ensure_ascii=False).lower()
+    required: set[str] = set()
+    if any(keyword in text for keyword in ["font", "字体", "times new roman", "宋体", "黑体", "楷体", "arial", "calibri"]):
+        required.add("font_family")
+    if any(keyword in text for keyword in ["字号", "font size", "pt", "磅", "小四", "小二", "三号", "四号", "五号"]):
+        required.add("font_size")
+    if any(keyword in text for keyword in ["对齐", "居中", "居左", "居右", "alignment", "center", "left", "right", "justify"]):
+        required.add("paragraph_alignment")
+    if any(keyword in text for keyword in ["行距", "段前", "段后", "line spacing", "spacing"]):
+        required.add("paragraph_spacing")
+    if any(keyword in text for keyword in ["缩进", "indent", "首行"]):
+        required.add("paragraph_indent")
+    if any(keyword in text for keyword in ["页边距", "纸张", "a4", "margin", "page setup"]):
+        required.add("page_setup")
+    if any(keyword in text for keyword in ["页眉", "header"]):
+        required.add("header")
+    if any(keyword in text for keyword in ["页脚", "页码", "footer", "page number"]):
+        required.add("footer_page_number")
+    if any(keyword in text for keyword in ["表格", "三线表", "表题", "table"]):
+        required.add("table_format")
+    if any(keyword in text for keyword in ["图片", "插图", "图题", "figure", "image"]):
+        required.add("figure_format")
+    if any(keyword in text for keyword in ["目录", "toc"]):
+        required.add("toc_rendered_page_consistency")
+    if any(keyword in text for keyword in ["公式", "formula", "equation"]):
+        required.add("formula_missing_number")
+    if any(keyword in text for keyword in ["参考文献", "引用", "citation", "reference"]):
+        required.add("citation_reference")
+    return required
+
+
+def rule_has_dedicated_python_checker(rule: dict[str, Any]) -> bool:
+    required = infer_required_checker_names(rule)
+    if not required:
+        return False
+    return required.issubset(set(IMPLEMENTED_PYTHON_CHECKS))
+
+
+def build_check_coverage_audit(format_rule: dict[str, Any], docx_evidence: dict[str, Any]) -> dict[str, Any]:
+    normalized_rules = normalize_format_rules(format_rule)
+    python_rules = filter_rules_by_check_method(normalized_rules, "python")
+    llm_rules = filter_rules_by_check_method(normalized_rules, "llm")
+    role_counts: Counter[str] = Counter()
+    for paragraph in docx_evidence.get("paragraphs") or []:
+        for role in paragraph.get("content_roles") or classify_paragraph_content_roles(paragraph):
+            role_counts[role] += 1
+
+    unsupported_rules: list[dict[str, Any]] = []
+    required_checkers: Counter[str] = Counter()
+    for rule in python_rules:
+        required = infer_required_checker_names(rule)
+        for checker in required:
+            required_checkers[checker] += 1
+        if not rule_has_dedicated_python_checker(rule):
+            unsupported_rules.append(
+                {
+                    "rule_id": rule.get("rule_id") or rule.get("id"),
+                    "category": rule.get("category"),
+                    "scope": rule.get("scope"),
+                    "rule_name": rule.get("rule_name") or rule.get("description"),
+                    "required_checkers": sorted(required),
+                }
+            )
+
+    areas_requiring_more_checkers = sorted(
+        {
+            checker.split("_", 1)[0]
+            for rule in unsupported_rules
+            for checker in rule.get("required_checkers", [])
+            if checker not in IMPLEMENTED_PYTHON_CHECKS
+        }
+    )
+    return {
+        "implemented_python_checks": IMPLEMENTED_PYTHON_CHECKS,
+        "known_unimplemented_python_checks": [
+            "odd_even_rendered_header_validation",
+            "cover_page_rendered_no_page_number_validation",
+            "cross_page_table_repeat_header_validation",
+            "reliable_image_dpi_validation",
+            "full_reference_style_semantic_classification",
+        ],
+        "evidence_summary": {
+            "paragraph_count": docx_evidence.get("paragraph_count", len(docx_evidence.get("paragraphs") or [])),
+            "section_count": docx_evidence.get("section_count"),
+            "table_count": docx_evidence.get("table_count", len(docx_evidence.get("tables") or [])),
+            "image_count": len(docx_evidence.get("images") or []),
+            "header_count": len((docx_evidence.get("headers_footers") or {}).get("headers") or []),
+            "footer_count": len((docx_evidence.get("headers_footers") or {}).get("footers") or []),
+            "footnote_count": len(docx_evidence.get("footnotes") or []),
+            "endnote_count": len(docx_evidence.get("endnotes") or []),
+        },
+        "paragraph_role_counts": dict(sorted(role_counts.items())),
+        "python_rule_count": len(python_rules),
+        "llm_rule_count": len(llm_rules),
+        "required_checker_counts": dict(sorted(required_checkers.items())),
+        "python_rules_without_dedicated_checker": unsupported_rules,
+        "areas_requiring_more_checkers": areas_requiring_more_checkers,
+    }
 
 
 def extract_formulas_from_docx(path: Path) -> list[dict[str, Any]]:
@@ -1674,8 +2368,10 @@ def run_hard_format_from_rule(
     docx_evidence = build_docx_analysis_evidence(checked_file)
     normalized_rules = normalize_format_rules(format_rule)
     python_rules = filter_rules_by_check_method(normalized_rules, "python")
+    coverage_audit = build_check_coverage_audit(format_rule, docx_evidence)
     issues = []
     issues.extend(run_deterministic_checks(python_rules, docx_evidence))
+    issues.extend(run_structural_format_checks(python_rules, docx_evidence))
     issues.extend(check_formula_format_from_docx(checked_file, python_rules))
     issues.extend(check_toc_page_consistency_from_docx(checked_file, docx_evidence, python_rules))
     issues = [normalize_issue(issue, index) for index, issue in enumerate(issues, start=1)]
@@ -1686,13 +2382,14 @@ def run_hard_format_from_rule(
             "paper_file": checked_file.name,
             "paper_type": checked_file.suffix.lstrip(".").lower() or "docx",
             "selected_parser": "python-docx+xml + Office Open XML + optional PDF rendering",
-            "check_summary": "已使用 Python 检查字体、字号、页边距、页码、公式、表格等硬性格式规则。",
+            "check_summary": "已使用 Python 检查段落、页面、页眉页脚、表格、图片题注、参考文献编号、公式和目录等硬性格式；需渲染或人工确认的项目见 coverage_audit。",
         },
         "statistics": statistics,
         "issues": issues,
         "llm_raw": {
             "normalized_rule_count": len(normalized_rules),
             "python_rule_count": len(python_rules),
+            "coverage_audit": coverage_audit,
             "docx_evidence_summary": {
                 "parser": docx_evidence.get("parser"),
                 "paragraph_count": docx_evidence.get("paragraph_count"),
@@ -1705,7 +2402,67 @@ def run_hard_format_from_rule(
     return set_result_workflow(format_rule, check_result, statistics, workflow)
 
 
-def run_semantic_check_from_rule(
+def run_complex_format_explanation_from_evidence(
+    settings: dict[str, Any],
+    format_rule: dict[str, Any],
+    checked_file: Path,
+    hard_result: dict[str, Any],
+    llm_log_output: Path,
+    workflow: str,
+) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
+    checked_text = read_document_text(checked_file)
+    docx_evidence = build_docx_analysis_evidence(checked_file)
+    normalized_rules = normalize_format_rules(format_rule)
+    python_rules = filter_rules_by_check_method(normalized_rules, "python")
+    prompt = force_chinese_output(
+        "你是复杂格式规则解释 Agent。你只解释 Python、WordprocessingML、LibreOffice/PDF 渲染或图片元数据已经提取出的格式证据，"
+        "判断这些复杂证据是否违反格式规范，并生成可批注的中文错误说明。"
+        "你不得检查语法、错别字、病句、摘要语义一致性、术语一致性等语言语义问题；这些由 agent3_language_semantic_checker 处理。"
+        "你可以处理奇偶页页眉、封面实际无页码、跨页表格续表、图片 DPI、图题表题与格式证据的解释。"
+        "请只输出合法 JSON，字段包括 paper_analysis、statistics、issues。每个 issue 必须包含 location、anchor_text、reason、expected、suggestion、comment_text。"
+    )
+    content = call_openai_compatible_chat(
+        settings,
+        [
+            {"role": "system", "content": prompt},
+            {
+                "role": "user",
+                "content": (
+                    f"Python 格式类规则 JSON：\n{json.dumps(python_rules, ensure_ascii=False)}\n\n"
+                    f"Python 硬格式检查结果 JSON：\n{json.dumps(hard_result, ensure_ascii=False)}\n\n"
+                    f"python-docx 结构化证据摘要 JSON：\n{json.dumps({'parser': docx_evidence.get('parser'), 'paragraph_count': docx_evidence.get('paragraph_count'), 'section_count': docx_evidence.get('section_count'), 'table_count': docx_evidence.get('table_count'), 'headers_footers': docx_evidence.get('headers_footers'), 'images': docx_evidence.get('images')}, ensure_ascii=False)}\n\n"
+                    "任务：只基于上述格式证据解释复杂格式问题，不要检查语言语义。\n\n"
+                    f"待检测论文文件名：{checked_file.name}\n\n"
+                    f"论文全文定位辅助：\n{checked_text[:12000]}"
+                ),
+            },
+        ],
+        agent_name="agent2_complex_format_explainer",
+        log_path=llm_log_output,
+    )
+    payload = parse_llm_json(content, "agent2_complex_format_explainer")
+    issues = [
+        normalize_issue({**issue, "source": issue.get("source") or "llm_complex_format_explainer"}, index)
+        for index, issue in enumerate(payload.get("issues", []), start=1)
+        if isinstance(issue, dict)
+    ]
+    statistics = recompute_statistics(issues, len(python_rules))
+    check_result = {
+        "paper_analysis": {
+            **(payload.get("paper_analysis") if isinstance(payload.get("paper_analysis"), dict) else {}),
+            "paper_file": checked_file.name,
+            "paper_type": checked_file.suffix.lstrip(".").lower() or "docx",
+            "selected_parser": "python evidence + LLM complex format explainer",
+            "check_summary": "已由复杂格式解释 Agent 基于 Python 格式证据解释复杂格式问题。",
+        },
+        "statistics": statistics,
+        "issues": issues,
+        "llm_raw": payload,
+    }
+    return set_result_workflow(format_rule, check_result, statistics, workflow)
+
+
+def run_language_semantic_check_from_rule(
     settings: dict[str, Any],
     format_rule: dict[str, Any],
     checked_file: Path,
@@ -1717,10 +2474,8 @@ def run_semantic_check_from_rule(
     normalized_rules = normalize_format_rules(format_rule)
     llm_rules = filter_rules_by_check_method(normalized_rules, "llm")
     prompt = force_chinese_output(
-        "You are a strict academic document-format checker, but in this workflow you are only responsible for semantic and language checks. "
-        "你是论文语义与语言质量检查员。你只检查语法、语义、错别字、中英文摘要对应关系、正文引用与参考文献对应关系、术语一致性。"
-        "不要检查字体、字号、页边距、页码、行距、表格边框、公式编号等硬性格式，这些由 Python 程序检查。"
-        "Python 已使用 python-docx 和 WordprocessingML 读取硬格式证据；你只能使用这些证据辅助定位，不要重新判断硬格式。"
+        "你是语言语义拓展检查 Agent。你只检查语法、错别字、病句、语义一致性、中英文摘要对应关系、正文引用与参考文献语义关系、术语一致性。"
+        "不要检查字体、字号、页边距、页码、行距、表格边框、公式编号、图题表题格式、页眉页脚等硬性格式；这些由基础格式功能处理。"
         "请只输出合法 JSON，字段包括 paper_analysis、statistics、issues。每个 issue 必须包含 location、anchor_text、reason、expected、suggestion、comment_text。"
         "location.paragraph_index 必须尽量使用 python-docx 结构化证据中的 paragraphs[].index。"
     )
@@ -1740,12 +2495,12 @@ def run_semantic_check_from_rule(
                 ),
             },
         ],
-        agent_name="agent2_check_paper_format",
+        agent_name="agent3_language_semantic_checker",
         log_path=llm_log_output,
     )
-    payload = parse_llm_json(content, "agent2_check_paper_format")
+    payload = parse_llm_json(content, "agent3_language_semantic_checker")
     issues = [
-        normalize_issue({**issue, "source": issue.get("source") or "llm_semantic_checker"}, index)
+        normalize_issue({**issue, "source": issue.get("source") or "llm_language_semantic_checker"}, index)
         for index, issue in enumerate(payload.get("issues", []), start=1)
         if isinstance(issue, dict)
     ]
@@ -1756,8 +2511,8 @@ def run_semantic_check_from_rule(
             **(payload.get("paper_analysis") if isinstance(payload.get("paper_analysis"), dict) else {}),
             "paper_file": checked_file.name,
             "paper_type": checked_file.suffix.lstrip(".").lower() or "docx",
-            "selected_parser": "plain-text-reader + LLM semantic checker",
-            "check_summary": "已由 LLM 检查语法、语义、错别字、摘要对应关系和引用对应关系。",
+            "selected_parser": "plain-text-reader + LLM language semantic checker",
+            "check_summary": "已由语言语义拓展 Agent 检查语法、错别字、病句、语义一致性和引用对应关系。",
             "checked_text_chars": len(checked_text),
             "checked_chunk_count": 1,
             "chunk_char_lengths": [len(checked_text)],
@@ -1772,24 +2527,53 @@ def run_semantic_check_from_rule(
     return set_result_workflow(format_rule, check_result, statistics, workflow)
 
 
-def run_hard_format_workflow(
+def run_base_format_workflow(
     settings: dict[str, Any],
     standard_file: Path,
     checked_file: Path,
     llm_log_output: Path,
 ) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
     format_rule = extract_format_rules_with_llm(settings, standard_file, llm_log_output)
-    return run_hard_format_from_rule(format_rule, checked_file, "hard_format")
+    return run_base_format_workflow_from_rule(settings, format_rule, checked_file, llm_log_output)
 
 
-def run_semantic_llm_workflow(
+def run_base_format_workflow_from_rule(
+    settings: dict[str, Any],
+    format_rule: dict[str, Any],
+    checked_file: Path,
+    llm_log_output: Path,
+) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
+    hard_format_rule = copy.deepcopy(format_rule)
+    _, hard_result, _ = run_hard_format_from_rule(hard_format_rule, checked_file, "base_format")
+    _, complex_result, _ = run_complex_format_explanation_from_evidence(
+        settings, format_rule, checked_file, hard_result, llm_log_output, "base_format"
+    )
+    issues = merge_issues(hard_result.get("issues", []), complex_result.get("issues", []))
+    statistics = recompute_statistics(issues, len(normalize_format_rules(format_rule)))
+    check_result = {
+        "paper_analysis": {
+            "paper_file": checked_file.name,
+            "paper_type": checked_file.suffix.lstrip(".").lower() or "docx",
+            "selected_parser": "python hard checker + LLM complex format explainer",
+            "check_summary": "已完成 Python 硬格式检查和复杂格式规则解释。",
+        },
+        "statistics": statistics,
+        "issues": issues,
+        "python_hard_format_result": hard_result,
+        "complex_format_result": complex_result,
+        "llm_raw": {"complex_format": complex_result.get("llm_raw")},
+    }
+    return set_result_workflow(format_rule, check_result, statistics, "base_format")
+
+
+def run_language_semantic_workflow(
     settings: dict[str, Any],
     standard_file: Path,
     checked_file: Path,
     llm_log_output: Path,
 ) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
     format_rule = extract_format_rules_with_llm(settings, standard_file, llm_log_output)
-    return run_semantic_check_from_rule(settings, format_rule, checked_file, llm_log_output, "semantic_llm")
+    return run_language_semantic_check_from_rule(settings, format_rule, checked_file, llm_log_output, "language_semantic")
 
 
 def run_full_check_workflow(
@@ -1799,28 +2583,30 @@ def run_full_check_workflow(
     llm_log_output: Path,
 ) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
     format_rule = extract_format_rules_with_llm(settings, standard_file, llm_log_output)
-    hard_format_rule = copy.deepcopy(format_rule)
-    _, hard_result, _ = run_hard_format_from_rule(hard_format_rule, checked_file, "hard_format")
-    _, semantic_result, _ = run_semantic_check_from_rule(settings, format_rule, checked_file, llm_log_output, "semantic_llm")
-    issues = merge_issues(hard_result.get("issues", []), semantic_result.get("issues", []))
+    base_format_rule = copy.deepcopy(format_rule)
+    _, base_result, _ = run_base_format_workflow_from_rule(settings, base_format_rule, checked_file, llm_log_output)
+    _, language_result, _ = run_language_semantic_check_from_rule(
+        settings, format_rule, checked_file, llm_log_output, "language_semantic"
+    )
+    issues = merge_issues(base_result.get("issues", []), language_result.get("issues", []))
     statistics = recompute_statistics(issues, len(normalize_format_rules(format_rule)))
     check_result = {
         "paper_analysis": {
             "paper_file": checked_file.name,
             "paper_type": checked_file.suffix.lstrip(".").lower() or "docx",
-            "selected_parser": "python hard checker + LLM semantic checker",
-            "check_summary": "已完成 Python 硬性格式检查和 LLM 语义语言检查。",
-            "checked_text_chars": semantic_result.get("paper_analysis", {}).get("checked_text_chars"),
-            "checked_chunk_count": semantic_result.get("paper_analysis", {}).get("checked_chunk_count"),
-            "chunk_char_lengths": semantic_result.get("paper_analysis", {}).get("chunk_char_lengths"),
+            "selected_parser": "base format checker + language semantic checker",
+            "check_summary": "已完成基础格式检查和语言语义拓展检查。",
+            "checked_text_chars": language_result.get("paper_analysis", {}).get("checked_text_chars"),
+            "checked_chunk_count": language_result.get("paper_analysis", {}).get("checked_chunk_count"),
+            "chunk_char_lengths": language_result.get("paper_analysis", {}).get("chunk_char_lengths"),
         },
         "statistics": statistics,
         "issues": issues,
-        "hard_format_result": hard_result,
-        "semantic_llm_result": semantic_result,
+        "base_format_result": base_result,
+        "language_semantic_result": language_result,
         "llm_raw": {
-            "chunk_count": semantic_result.get("llm_raw", {}).get("chunk_count", 1),
-            "full_paper": semantic_result.get("llm_raw"),
+            "language_semantic": language_result.get("llm_raw"),
+            "base_format": base_result.get("llm_raw"),
         },
     }
     return set_result_workflow(format_rule, check_result, statistics, "full_check")
@@ -2000,10 +2786,10 @@ def run_selected_workflow(
     format_rule_output: Path,
     llm_log_output: Path,
 ) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
-    if workflow == "hard_format":
-        return run_hard_format_workflow(settings, standard_file, checked_file, llm_log_output)
-    if workflow == "semantic_llm":
-        return run_semantic_llm_workflow(settings, standard_file, checked_file, llm_log_output)
+    if workflow == "base_format":
+        return run_base_format_workflow(settings, standard_file, checked_file, llm_log_output)
+    if workflow == "language_semantic":
+        return run_language_semantic_workflow(settings, standard_file, checked_file, llm_log_output)
     if workflow == "full_check":
         return run_full_check_workflow(settings, standard_file, checked_file, llm_log_output)
     raise ValueError(f"Unsupported workflow: {workflow}")

@@ -246,7 +246,7 @@ const severityLabels = {
 const models = ref(fallbackModels)
 const provider = ref('deepseek')
 const model = ref('deepseek-chat')
-const workflow = ref('full_check')
+const workflow = ref('base_format')
 const standardFile = ref(null)
 const checkedFile = ref(null)
 const status = ref('idle')
@@ -273,6 +273,26 @@ const workflowOptions = [
     description: '语法、语义、错别字、摘要对应、引用对应关系由 LLM 检查'
   }
 ]
+
+workflowOptions.splice(
+  0,
+  workflowOptions.length,
+  {
+    value: 'base_format',
+    label: '基础格式检查',
+    description: 'Python 检查硬性格式，LLM 只解释复杂格式规则和渲染类证据'
+  },
+  {
+    value: 'language_semantic',
+    label: '语言语义拓展',
+    description: 'LLM 检查语法、错别字、病句、语义一致性、引用与参考文献关系'
+  },
+  {
+    value: 'full_check',
+    label: '完整检查',
+    description: '同时运行基础格式检查和语言语义拓展检查'
+  }
+)
 
 const providerOptions = computed(() => {
   const seen = new Set()
@@ -320,6 +340,17 @@ const workflowLabels = {
   hybrid: '完整检查',
   compare: '完整检查'
 }
+
+Object.assign(workflowLabels, {
+  base_format: '基础格式检查',
+  language_semantic: '语言语义拓展',
+  full_check: '完整检查',
+  hard_format: '基础格式检查',
+  semantic_llm: '语言语义拓展',
+  llm_direct: '语言语义拓展',
+  hybrid: '完整检查',
+  compare: '完整检查'
+})
 
 const statusTitle = computed(() => {
   if (status.value === 'running') return '正在检测'
@@ -458,7 +489,7 @@ function resetTask() {
   checkedFile.value = null
   result.value = null
   validationMessage.value = ''
-  workflow.value = 'full_check'
+  workflow.value = 'base_format'
   status.value = 'idle'
   statusMessage.value = '等待上传规范文件和待检测论文。'
 }

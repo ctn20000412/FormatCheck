@@ -1,7 +1,7 @@
 {
   "provider" : "deepseek",
   "model" : "deepseek-v4-flash",
-  "workflow" : "compare",
+  "workflow" : "hard_format",
   "work_dir" : "E:\\code\\formatCheck\\results\\840012223_盲审版",
   "checked_file" : "E:\\code\\formatCheck\\results\\840012223_盲审版\\待检测文件\\840012223-盲审版.docx",
   "standard_file" : "E:\\code\\formatCheck\\results\\840012223_盲审版\\规则规范文件\\电信院硕士研究生学位论文格式规范.docx",

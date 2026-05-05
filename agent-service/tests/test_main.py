@@ -10,9 +10,11 @@ from pathlib import Path
 
 from app.main import (
     AgentHttpHandler,
+    build_check_coverage_audit,
     build_docx_analysis_evidence,
     build_request_paths,
     check_formula_format_from_docx,
+    run_structural_format_checks,
     extract_formulas_from_docx,
     filter_rules_by_check_method,
     normalize_workflow,
@@ -341,12 +343,152 @@ class AgentServiceTest(unittest.TestCase):
         self.assertEqual(1, len(issues))
         self.assertEqual(3, issues[0]["location"]["paragraph_index"])
 
+    def test_heading_font_rule_only_checks_matching_heading_scope(self):
+        rule = {
+            "rule_id": "R-HEADING-1",
+            "category": "Font and Font Size",
+            "rule_name": "一级标题字体",
+            "scope": "一级标题（章标题）",
+            "requirement": "一级标题使用黑体。",
+            "expected_value": "黑体",
+            "check_method": "python",
+        }
+        evidence = {
+            "paragraphs": [
+                {
+                    "index": 1,
+                    "text": "第一章 绪论",
+                    "style_id": "Heading1",
+                    "style_name": "标题 1",
+                    "runs": [{"text": "第一章 绪论", "effective_properties": {"east_asia_font": "宋体"}}],
+                },
+                {
+                    "index": 2,
+                    "text": "正文内容",
+                    "style_id": "Normal",
+                    "style_name": "正文",
+                    "runs": [{"text": "正文内容", "effective_properties": {"east_asia_font": "宋体"}}],
+                },
+            ]
+        }
+
+        issues = run_deterministic_checks([rule], evidence)
+
+        self.assertEqual(1, len(issues))
+        self.assertEqual(1, issues[0]["location"]["paragraph_index"])
+
+    def test_body_font_rule_does_not_check_heading_paragraphs(self):
+        rule = {
+            "rule_id": "R-BODY",
+            "category": "Font and Font Size",
+            "rule_name": "正文字体",
+            "scope": "正文",
+            "requirement": "正文使用宋体。",
+            "expected_value": "宋体",
+            "check_method": "python",
+        }
+        evidence = {
+            "paragraphs": [
+                {
+                    "index": 1,
+                    "text": "第一章 绪论",
+                    "style_id": "Heading1",
+                    "style_name": "标题 1",
+                    "runs": [{"text": "第一章 绪论", "effective_properties": {"east_asia_font": "黑体"}}],
+                },
+                {
+                    "index": 2,
+                    "text": "正文内容",
+                    "style_id": "Normal",
+                    "style_name": "正文",
+                    "runs": [{"text": "正文内容", "effective_properties": {"east_asia_font": "宋体"}}],
+                },
+            ]
+        }
+
+        issues = run_deterministic_checks([rule], evidence)
+
+        self.assertEqual([], issues)
+
+    def test_body_font_size_rule_checks_matching_body_scope(self):
+        rule = {
+            "rule_id": "R-BODY-SIZE",
+            "category": "Font and Font Size",
+            "rule_name": "正文字号",
+            "scope": "正文",
+            "requirement": "正文使用小四号。",
+            "expected_value": "小四号",
+            "check_method": "python",
+        }
+        evidence = {
+            "paragraphs": [
+                {
+                    "index": 1,
+                    "text": "第一章 绪论",
+                    "style_id": "Heading1",
+                    "style_name": "标题 1",
+                    "runs": [{"text": "第一章 绪论", "effective_properties": {"font_size_pt": 18.0}}],
+                },
+                {
+                    "index": 2,
+                    "text": "正文内容",
+                    "style_id": "Normal",
+                    "style_name": "正文",
+                    "runs": [{"text": "正文内容", "effective_properties": {"font_size_pt": 10.5}}],
+                },
+            ]
+        }
+
+        issues = run_deterministic_checks([rule], evidence)
+
+        self.assertEqual(1, len(issues))
+        self.assertEqual(2, issues[0]["location"]["paragraph_index"])
+
+    def test_heading_alignment_rule_checks_matching_heading_scope(self):
+        rule = {
+            "rule_id": "R-HEADING-ALIGN",
+            "category": "Paragraph Formatting",
+            "rule_name": "一级标题对齐",
+            "scope": "一级标题（章标题）",
+            "requirement": "一级标题居中。",
+            "expected_value": "居中",
+            "check_method": "python",
+        }
+        evidence = {
+            "paragraphs": [
+                {
+                    "index": 1,
+                    "text": "第一章 绪论",
+                    "style_id": "Heading1",
+                    "style_name": "标题 1",
+                    "effective_paragraph_properties": {"alignment": "left"},
+                    "runs": [{"text": "第一章 绪论", "effective_properties": {"east_asia_font": "黑体"}}],
+                },
+                {
+                    "index": 2,
+                    "text": "正文内容",
+                    "style_id": "Normal",
+                    "style_name": "正文",
+                    "effective_paragraph_properties": {"alignment": "center"},
+                    "runs": [{"text": "正文内容", "effective_properties": {"east_asia_font": "宋体"}}],
+                },
+            ]
+        }
+
+        issues = run_deterministic_checks([rule], evidence)
+
+        self.assertEqual(1, len(issues))
+        self.assertEqual(1, issues[0]["location"]["paragraph_index"])
+
     def test_new_workflow_names_are_supported_and_old_names_are_aliased(self):
         self.assertEqual("full_check", normalize_workflow(None))
-        self.assertEqual("hard_format", normalize_workflow("hard_format"))
-        self.assertEqual("semantic_llm", normalize_workflow("semantic_llm"))
+        self.assertEqual("base_format", normalize_workflow("hard_format"))
+        self.assertEqual("base_format", normalize_workflow("base_format"))
+        self.assertEqual("language_semantic", normalize_workflow("language_semantic"))
+        self.assertEqual("language_semantic", normalize_workflow("semantic_llm"))
         self.assertEqual("full_check", normalize_workflow("full_check"))
-        self.assertEqual("semantic_llm", normalize_workflow("llm_direct"))
+        self.assertEqual("language_semantic", normalize_workflow("llm_direct"))
+        self.assertEqual("base_format", normalize_workflow("hard_format"))
         self.assertEqual("full_check", normalize_workflow("hybrid"))
         self.assertEqual("full_check", normalize_workflow("compare"))
 
@@ -360,6 +502,196 @@ class AgentServiceTest(unittest.TestCase):
 
         self.assertEqual(["R001", "R004"], [rule["rule_id"] for rule in filter_rules_by_check_method(rules, "python")])
         self.assertEqual(["R002", "R003"], [rule["rule_id"] for rule in filter_rules_by_check_method(rules, "llm")])
+
+    def test_check_coverage_audit_reports_unimplemented_hard_rule_areas(self):
+        format_rule = {
+            "rules": [
+                {
+                    "rule_id": "R001",
+                    "category": "Font and Font Size",
+                    "scope": "正文",
+                    "requirement": "正文使用宋体小四号。",
+                    "check_method": "python",
+                },
+                {
+                    "rule_id": "R002",
+                    "category": "Table Formatting",
+                    "scope": "所有表格",
+                    "requirement": "表格必须为三线表。",
+                    "check_method": "python",
+                },
+                {
+                    "rule_id": "R003",
+                    "category": "Citations and References",
+                    "scope": "参考文献列表",
+                    "requirement": "参考文献格式应符合规范。",
+                    "check_method": "llm",
+                },
+            ]
+        }
+        evidence = {
+            "paragraph_count": 2,
+            "section_count": 1,
+            "table_count": 1,
+            "paragraphs": [
+                {"index": 1, "text": "正文内容", "content_roles": ["body"]},
+                {"index": 2, "text": "表1 测试", "content_roles": ["table_caption"]},
+            ],
+            "tables": [{"index": 1}],
+            "images": [{"index": 1}],
+            "headers_footers": {"headers": [{"text": "页眉"}], "footers": []},
+            "footnotes": [{"id": "2"}],
+            "endnotes": [],
+        }
+
+        audit = build_check_coverage_audit(format_rule, evidence)
+
+        self.assertIn("font_family", audit["implemented_python_checks"])
+        self.assertEqual(1, audit["evidence_summary"]["table_count"])
+        self.assertIn("body", audit["paragraph_role_counts"])
+        self.assertEqual([], [rule["rule_id"] for rule in audit["python_rules_without_dedicated_checker"]])
+        self.assertNotIn("table", audit["areas_requiring_more_checkers"])
+
+    def test_structural_checks_cover_page_paragraph_table_figure_reference_and_formula_rules(self):
+        rules = [
+            {
+                "rule_id": "R-PAGE",
+                "category": "Page Setup",
+                "scope": "整篇论文",
+                "requirement": "页边距为上25mm，下25mm，左30mm，右20mm。",
+                "check_method": "python",
+            },
+            {
+                "rule_id": "R-SPACING",
+                "category": "Paragraph Formatting",
+                "scope": "正文",
+                "requirement": "正文为1.5倍行距，段前、段后无空行。",
+                "check_method": "python",
+            },
+            {
+                "rule_id": "R-INDENT",
+                "category": "Paragraph Formatting",
+                "scope": "正文",
+                "requirement": "正文首行缩进2字符。",
+                "check_method": "python",
+            },
+            {
+                "rule_id": "R-TABLE",
+                "category": "Table Formatting",
+                "scope": "所有表格",
+                "requirement": "一律使用三线表，上下边线1.5磅，表内线1磅。",
+                "check_method": "python",
+            },
+            {
+                "rule_id": "R-FIGURE",
+                "category": "Image Formatting",
+                "scope": "插图",
+                "requirement": "图题在图片下方居中，编号格式为图X-Y。",
+                "check_method": "python",
+            },
+            {
+                "rule_id": "R-REF",
+                "category": "Citations and References",
+                "scope": "正文中引用",
+                "requirement": "正文引用编号应能在参考文献列表中找到。",
+                "check_method": "python",
+            },
+            {
+                "rule_id": "R-FORMULA",
+                "category": "Other Formatting",
+                "scope": "公式",
+                "requirement": "公式编号格式为(X-Y)，公式居中。",
+                "check_method": "python",
+            },
+            {
+                "rule_id": "R-HEADER",
+                "category": "Page Setup",
+                "scope": "页眉",
+                "requirement": "页眉应有内容。",
+                "check_method": "python",
+            },
+            {
+                "rule_id": "R-FOOTER",
+                "category": "Page Setup",
+                "scope": "页码",
+                "requirement": "页脚应包含页码。",
+                "check_method": "python",
+            },
+        ]
+        evidence = {
+            "sections": [
+                {
+                    "index": 1,
+                    "page_width_mm": 210.0,
+                    "page_height_mm": 297.0,
+                    "top_margin_mm": 20.0,
+                    "bottom_margin_mm": 25.0,
+                    "left_margin_mm": 25.0,
+                    "right_margin_mm": 20.0,
+                    "header_distance_mm": 12.0,
+                    "footer_distance_mm": 15.0,
+                }
+            ],
+            "paragraphs": [
+                {
+                    "index": 1,
+                    "text": "正文引用[2]",
+                    "content_roles": ["body"],
+                    "effective_paragraph_properties": {
+                        "spacing": {"line": "240", "line_rule": "auto", "before_pt": 6.0, "after_pt": 0.0},
+                        "indent": {"first_line_pt": 0.0},
+                    },
+                    "runs": [{"text": "正文引用[2]", "effective_properties": {"east_asia_font": "宋体", "font_size_pt": 12.0}}],
+                },
+                {
+                    "index": 2,
+                    "text": "表1 错误表题",
+                    "content_roles": ["table_caption"],
+                    "effective_paragraph_properties": {"alignment": "left"},
+                    "runs": [{"text": "表1 错误表题", "effective_properties": {"east_asia_font": "宋体", "font_size_pt": 12.0}}],
+                },
+                {
+                    "index": 3,
+                    "text": "图1 错误图题",
+                    "content_roles": ["figure_caption"],
+                    "effective_paragraph_properties": {"alignment": "left"},
+                    "runs": [{"text": "图1 错误图题", "effective_properties": {"east_asia_font": "宋体", "font_size_pt": 12.0}}],
+                },
+                {"index": 4, "text": "[1] 作者. 题名.", "content_roles": ["reference"], "runs": []},
+                {
+                    "index": 5,
+                    "text": "E=mc2 (1)",
+                    "content_roles": ["formula"],
+                    "effective_paragraph_properties": {"alignment": "left"},
+                    "runs": [],
+                },
+            ],
+            "tables": [
+                {
+                    "index": 1,
+                    "borders": {
+                        "top": {"val": "single", "size": "8"},
+                        "bottom": {"val": "single", "size": "8"},
+                        "left": {"val": "single", "size": "4"},
+                        "right": {"val": "single", "size": "4"},
+                        "insideV": {"val": "single", "size": "4"},
+                    },
+                }
+            ],
+            "images": [{"relationship_id": "rIdImage1", "target": "media/image1.png"}],
+            "headers_footers": {"headers": [{"text": ""}], "footers": []},
+        }
+
+        issues = run_structural_format_checks(rules, evidence)
+
+        categories = {issue["category"] for issue in issues}
+        self.assertIn("page_setup", categories)
+        self.assertIn("paragraph_format", categories)
+        self.assertIn("table_format", categories)
+        self.assertIn("figure_format", categories)
+        self.assertIn("citation_reference", categories)
+        self.assertIn("formula_format", categories)
+        self.assertIn("header_footer", categories)
 
     def test_formula_ooxml_is_extracted_and_missing_number_is_reported(self):
         with self.temp_directory() as temp:
