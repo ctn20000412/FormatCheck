@@ -1,0 +1,24 @@
+{
+  "file_analysis": {
+    "file_name": "standard.docx",
+    "file_type": "docx",
+    "selected_parser": "docx text parser",
+    "analysis_summary": "test"
+  },
+  "rules": [
+    {
+      "rule_id": "R001",
+      "category": "page_setup",
+      "rule_name": "Margins",
+      "scope": "whole document",
+      "requirement": "Top margin is 25mm.",
+      "check_logic": "Check section page margin.",
+      "expected_value": "25mm",
+      "source_text": "top margin 25mm",
+      "source_type": "explicit_text",
+      "confidence": "high",
+      "need_manual_confirmation": false,
+      "severity": "high"
+    }
+  ]
+}

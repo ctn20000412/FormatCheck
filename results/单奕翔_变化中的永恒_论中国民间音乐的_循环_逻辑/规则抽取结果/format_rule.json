@@ -1,0 +1,20 @@
+{
+  "file_analysis": {
+    "file_name": "中央音乐学院格式规范pdf.pdf",
+    "file_type": "pdf",
+    "selected_parser": "llm-document-reader",
+    "llm_provider": "deepseek",
+    "llm_model": "deepseek-v4-flash",
+    "analysis_summary": "已由 LLM 根据规范文件抽取格式规则。"
+  },
+  "rules": [],
+  "llm_raw": {
+    "file_analysis": {
+      "file_name": "中央音乐学院格式规范pdf.pdf",
+      "file_type": "PDF",
+      "selected_parser": "PDF解析器",
+      "analysis_summary": "无法解析PDF文件内容，文件为二进制流，无法提取文本信息，未找到可检查的格式要求。"
+    },
+    "rules": []
+  }
+}

@@ -1,0 +1,467 @@
+{
+  "summary": {
+    "total_rules": 116,
+    "failed_rules": 18,
+    "total_issues": 19
+  },
+  "issues": [
+    {
+      "issue_id": "I001",
+      "rule_id": "R002",
+      "category": "文件结构",
+      "severity": "high",
+      "uncertain": true,
+      "location": {
+        "section": "全文/对应段落",
+        "paragraph_index": 1
+      },
+      "text_snippet": "变化中的永恒",
+      "problem": "论文基本结构不完整，未发现封面、原创性声明和论文使用授权说明、注释和参考文献、附录等规定组成部分",
+      "current_value": "文档直接以题名开始，后接摘要、关键词、正文和结语",
+      "expected_value": "封面 → 原创性声明和论文使用授权说明 → 摘要 → 关键词 → 正文 → 注释和参考文献 → 附录",
+      "suggestion": "按论文类型补齐前置页、声明授权页、文末注释/参考文献及附录；若本文不是学位论文终稿，请人工确认适用范围"
+    },
+    {
+      "issue_id": "I002",
+      "rule_id": "R007",
+      "category": "摘要格式",
+      "severity": "medium",
+      "uncertain": false,
+      "location": {
+        "section": "全文/对应段落",
+        "paragraph_index": 6
+      },
+      "text_snippet": "摘要：中国民间音乐旋律发展中大量存在着“循环”手法，它包括作为音乐曲体结构的循环体，也包括旋律发展中重复和衍生旋律的发展手法，形成中国民间音乐在旋律发展中的内在逻辑。本文从循环原则、循环路径以及对循环逻辑的哲理阐释三个层面对循环逻辑进行讨论",
+      "problem": "中文摘要缺少独立题头“论文摘要”，且当前为正文段落内联“摘要：”",
+      "current_value": "摘要以“摘要：”直接置于正文段落开头，左对齐",
+      "expected_value": "题头“论文摘要”应位于页面上方居中，用黑体小二号字",
+      "suggestion": "将摘要部分改为独立页面/独立段落题头“论文摘要”，居中设置为黑体小二；摘要正文另起段落"
+    },
+    {
+      "issue_id": "I003",
+      "rule_id": "R009",
+      "category": "摘要格式",
+      "severity": "medium",
+      "uncertain": true,
+      "location": {
+        "section": "全文/对应段落",
+        "paragraph_index": 6
+      },
+      "text_snippet": "摘要：中国民间音乐旋律发展中大量存在着“循环”手法，它包括作为音乐曲体结构的循环体，也包括旋律发展中重复和衍生旋律的发展手法，形成中国民间音乐在旋律发展中的内在逻辑。本文从循环原则、循环路径以及对循环逻辑的哲理阐释三个层面对循环逻辑进行讨论",
+      "problem": "中文摘要字数不足",
+      "current_value": "约182字",
+      "expected_value": "音乐硕士中文摘要篇幅以300—500字左右为宜",
+      "suggestion": "扩充摘要内容，补充研究对象、方法、结论和创新点，使篇幅达到约300—500字"
+    },
+    {
+      "issue_id": "I004",
+      "rule_id": "R010",
+      "category": "英文摘要",
+      "severity": "medium",
+      "uncertain": false,
+      "location": {
+        "section": "全文/对应段落",
+        "paragraph_index": 6
+      },
+      "text_snippet": "摘要：中国民间音乐旋律发展中大量存在着“循环”手法，它包括作为音乐曲体结构的循环体，也包括旋律发展中重复和衍生旋律的发展手法，形成中国民间音乐在旋律发展中的内在逻辑。本文从循环原则、循环路径以及对循环逻辑的哲理阐释三个层面对循环逻辑进行讨论",
+      "problem": "未发现英文摘要题头“Abstract”",
+      "current_value": "文档中仅有中文摘要，未发现英文摘要部分",
+      "expected_value": "英文摘要题头“Abstract”位于页面上方居中，用相当于中文小二号字加粗的 Times New Roman 体",
+      "suggestion": "在中文摘要及关键词后补充英文摘要，并设置“Abstract”题头格式"
+    },
+    {
+      "issue_id": "I005",
+      "rule_id": "R016",
+      "category": "关键词格式",
+      "severity": "medium",
+      "uncertain": false,
+      "location": {
+        "section": "全文/对应段落",
+        "paragraph_index": 7
+      },
+      "text_snippet": "关键词：中国民间音乐；非线性时间；循环逻辑",
+      "problem": "中文关键词标签字体不符合规范",
+      "current_value": "“关键词：”为宋体小四加粗",
+      "expected_value": "“关键词”三个字用黑体小四号字，后接宋体冒号“：”",
+      "suggestion": "将“关键词”三个字改为黑体小四，冒号保留为宋体冒号“：”"
+    },
+    {
+      "issue_id": "I006",
+      "rule_id": "R022",
+      "category": "目录格式",
+      "severity": "medium",
+      "uncertain": false,
+      "location": {
+        "section": "全文/对应段落",
+        "paragraph_index": 1
+      },
+      "text_snippet": "变化中的永恒",
+      "problem": "未发现目录题头和目录页",
+      "current_value": "文档题名后直接进入作者、摘要和正文",
+      "expected_value": "题头“目录”位于页面上方居中，字间空两个半角字符，用黑体小二号字",
+      "suggestion": "在摘要/关键词后补充目录页，并按规范设置“目  录”题头及目录条目"
+    },
+    {
+      "issue_id": "I007",
+      "rule_id": "R031",
+      "category": "绪论/引言格式",
+      "severity": "medium",
+      "uncertain": false,
+      "location": {
+        "section": "全文/对应段落",
+        "paragraph_index": 10
+      },
+      "text_snippet": "在中国民间音乐理论中，学者们通常将“循环”视为一种曲体结构，李西安、军驰所著的《中国民族曲式》一书早在1960年代就已有了对民间音乐“循环体”的论述：“在两个或两个以上段落组成的乐曲中，有一部分音乐反复出现达两次或两次以上，而在它各次出现之",
+      "problem": "正文开始前未设置独立的“绪论/序言/引言”题头",
+      "current_value": "关键词和作者简介后直接进入正文首段",
+      "expected_value": "题头“绪论”（或“序言”“引言”）位于页面上方居中，字间空两个半角字符，用黑体小二号字",
+      "suggestion": "在正文开始前增加“绪  论”或“引  言”题头，并按规范设置居中、黑体小二"
+    },
+    {
+      "issue_id": "I008",
+      "rule_id": "R043",
+      "category": "正文段落格式",
+      "severity": "medium",
+      "uncertain": false,
+      "location": {
+        "section": "全文/对应段落",
+        "paragraph_index": 10
+      },
+      "text_snippet": "在中国民间音乐理论中，学者们通常将“循环”视为一种曲体结构，李西安、军驰所著的《中国民族曲式》一书早在1960年代就已有了对民间音乐“循环体”的论述：“在两个或两个以上段落组成的乐曲中，有一部分音乐反复出现达两次或两次以上，而在它各次出现之",
+      "problem": "正文多处段落未设置为两端对齐",
+      "current_value": "检测到多处正文段落为左对齐或未显式设置两端对齐",
+      "expected_value": "正文两端对齐",
+      "suggestion": "将全文正文普通段落统一设置为两端对齐"
+    },
+    {
+      "issue_id": "I009",
+      "rule_id": "R044",
+      "category": "正文段落格式",
+      "severity": "medium",
+      "uncertain": false,
+      "location": {
+        "section": "全文/对应段落",
+        "paragraph_index": 10
+      },
+      "text_snippet": "在中国民间音乐理论中，学者们通常将“循环”视为一种曲体结构，李西安、军驰所著的《中国民族曲式》一书早在1960年代就已有了对民间音乐“循环体”的论述：“在两个或两个以上段落组成的乐曲中，有一部分音乐反复出现达两次或两次以上，而在它各次出现之",
+      "problem": "正文行距不符合固定值20磅要求",
+      "current_value": "检测到正文普通段落多为1.5倍行距",
+      "expected_value": "正文行距为固定值20磅",
+      "suggestion": "将全文正文普通段落行距统一设置为固定值20磅"
+    },
+    {
+      "issue_id": "I010",
+      "rule_id": "R047",
+      "category": "页码格式",
+      "severity": "medium",
+      "uncertain": false,
+      "location": {
+        "section": "全文/对应段落",
+        "paragraph_index": 1
+      },
+      "text_snippet": "变化中的永恒",
+      "problem": "未发现正文页码",
+      "current_value": "页眉/页脚未检测到页码内容",
+      "expected_value": "正文页码一律使用宋体小四号阿拉伯数字，并延续至全文结束",
+      "suggestion": "在页脚添加阿拉伯数字页码，并设置为宋体小四"
+    },
+    {
+      "issue_id": "I011",
+      "rule_id": "R049",
+      "category": "页码格式",
+      "severity": "medium",
+      "uncertain": false,
+      "location": {
+        "section": "全文/对应段落",
+        "paragraph_index": 1
+      },
+      "text_snippet": "变化中的永恒",
+      "problem": "页码位置不符合要求或缺失",
+      "current_value": "页脚为空，未见页面底端居中页码",
+      "expected_value": "页码位于页面底端，居中排版",
+      "suggestion": "在页面底端居中位置插入页码"
+    },
+    {
+      "issue_id": "I012",
+      "rule_id": "R077",
+      "category": "参考文献",
+      "severity": "medium",
+      "uncertain": false,
+      "location": {
+        "section": "全文/对应段落",
+        "paragraph_index": 66
+      },
+      "text_snippet": "结语",
+      "problem": "文末未发现独立参考文献部分",
+      "current_value": "文档以“结语”及其正文结束，未见“参考文献”题头",
+      "expected_value": "参考文献列于文末",
+      "suggestion": "在正文/结语后补充参考文献部分，并按规范列出中文和外文参考文献"
+    },
+    {
+      "issue_id": "I013",
+      "rule_id": "R038",
+      "category": "标题编号",
+      "severity": "medium",
+      "uncertain": false,
+      "location": {
+        "section": "全文/对应段落",
+        "paragraph_index": 16
+      },
+      "text_snippet": "（一）宏观结构下的递归现象",
+      "problem": "括号层级标题格式不符合条名格式要求",
+      "current_value": "“（一）宏观结构下的递归现象”为宋体小四/加粗或样式继承，未按条名格式统一",
+      "expected_value": "条名左缩进两个汉字（0.75厘米），用宋体四号字",
+      "suggestion": "将“（一）（二）（三）”等同级标题统一设置为宋体四号，左缩进两个汉字"
+    },
+    {
+      "issue_id": "I014",
+      "rule_id": "R038",
+      "category": "标题编号",
+      "severity": "medium",
+      "uncertain": false,
+      "location": {
+        "section": "全文/对应段落",
+        "paragraph_index": 33
+      },
+      "text_snippet": "（三）递归与衍生的交互生成",
+      "problem": "同级括号标题样式不统一",
+      "current_value": "“（三）递归与衍生的交互生成”使用了 Heading 3，视觉层级接近一级标题",
+      "expected_value": "括号层级标题应按条名格式处理，左缩进两个汉字，用宋体四号字",
+      "suggestion": "将该标题改为与“（一）（二）”同级的条名样式，避免使用一级标题样式"
+    },
+    {
+      "issue_id": "I015",
+      "rule_id": "R103",
+      "category": "表格格式",
+      "severity": "medium",
+      "uncertain": false,
+      "location": {
+        "section": "全文/对应段落",
+        "paragraph_index": 18
+      },
+      "text_snippet": "表1：江南丝竹《三六》循环结构",
+      "problem": "表号、表题字体不符合规范",
+      "current_value": "表题为宋体小四加粗",
+      "expected_value": "表号、表题用小四号黑体字",
+      "suggestion": "将所有表号、表题统一设置为小四号黑体"
+    },
+    {
+      "issue_id": "I016",
+      "rule_id": "R102",
+      "category": "表格格式",
+      "severity": "medium",
+      "uncertain": false,
+      "location": {
+        "section": "全文/对应段落",
+        "paragraph_index": 47
+      },
+      "text_snippet": "表4：长三角地区乱弹系统与滩簧系统剧种部分三段唱腔结构，单奕翔整理",
+      "problem": "表号、表题未居中排列",
+      "current_value": "“表4：长三角地区乱弹系统与滩簧系统剧种部分三段唱腔结构，单奕翔整理”未显式设置居中",
+      "expected_value": "表号、表题置于表格上方并居中排列",
+      "suggestion": "将该表题设置为表格上方居中，并同步检查其他表题位置"
+    },
+    {
+      "issue_id": "I017",
+      "rule_id": "R091",
+      "category": "谱例编号",
+      "severity": "medium",
+      "uncertain": false,
+      "location": {
+        "section": "全文/对应段落",
+        "paragraph_index": 29
+      },
+      "text_snippet": "谱例2a：彝族民歌《猜调》垛句",
+      "problem": "谱例编号未按全文顺序编号样式统一",
+      "current_value": "出现“谱例2a”“谱例2b”“谱例4-a”“谱例4-b”等带字母/连字符编号",
+      "expected_value": "不分章节论文的谱例全文顺序编号，如“谱例1”“谱例2”",
+      "suggestion": "统一改为全文连续编号；如确需子编号，请在规范中补充子编号规则并人工确认"
+    },
+    {
+      "issue_id": "I018",
+      "rule_id": "R093",
+      "category": "谱例格式",
+      "severity": "medium",
+      "uncertain": false,
+      "location": {
+        "section": "全文/对应段落",
+        "paragraph_index": 26
+      },
+      "text_snippet": "谱例1：广东音乐《雨打芭蕉》片段",
+      "problem": "谱例名称位置和字体不符合规范",
+      "current_value": "谱例标题为居中、宋体小四加粗",
+      "expected_value": "谱例名称用小四号黑体字，置于谱例左上方，左缩进两个汉字",
+      "suggestion": "将所有谱例名称改为小四号黑体，放在谱例左上方并左缩进两个汉字"
+    },
+    {
+      "issue_id": "I019",
+      "rule_id": "R088",
+      "category": "谱例引用",
+      "severity": "medium",
+      "uncertain": false,
+      "location": {
+        "section": "全文/对应段落",
+        "paragraph_index": 26
+      },
+      "text_snippet": "谱例1：广东音乐《雨打芭蕉》片段",
+      "problem": "节选谱例出处要素不完整",
+      "current_value": "谱例标题仅列出名称，未完整标注作品名称、出版社、年代、节选章节、小节数等出处要素",
+      "expected_value": "节选片段谱例须注明作品名称、出版社、年代、节选章节、小节数等",
+      "suggestion": "为每个节选谱例补充出处说明；可置于谱例题名、脚注或图注中"
+    }
+  ],
+  "annotations": [
+    {
+      "comment_id": "C001",
+      "rule_id": "R002",
+      "anchor_text": "变化中的永恒",
+      "comment_content": "【格式错误】论文基本结构不完整，未发现封面、原创性声明和论文使用授权说明、注释和参考文献、附录等规定组成部分\n【规范要求】封面 → 原创性声明和论文使用授权说明 → 摘要 → 关键词 → 正文 → 注释和参考文献 → 附录\n【修改建议】按论文类型补齐前置页、声明授权页、文末注释/参考文献及附录；若本文不是学位论文终稿，请人工确认适用范围",
+      "suggestion": "按论文类型补齐前置页、声明授权页、文末注释/参考文献及附录；若本文不是学位论文终稿，请人工确认适用范围",
+      "severity": "high"
+    },
+    {
+      "comment_id": "C002",
+      "rule_id": "R007",
+      "anchor_text": "摘要：中国民间音乐旋律发展中大量存在着“循环”手法，它包括作为音乐曲体结构的循环体，也包括旋律发展中重复和衍生旋律的发展手法，形成中国民间音乐在旋律发展中的内在逻辑。本文从循环原则、循环路径以及对循环逻辑的哲理阐释三个层面对循环逻辑进行讨论",
+      "comment_content": "【格式错误】中文摘要缺少独立题头“论文摘要”，且当前为正文段落内联“摘要：”\n【规范要求】题头“论文摘要”应位于页面上方居中，用黑体小二号字\n【修改建议】将摘要部分改为独立页面/独立段落题头“论文摘要”，居中设置为黑体小二；摘要正文另起段落",
+      "suggestion": "将摘要部分改为独立页面/独立段落题头“论文摘要”，居中设置为黑体小二；摘要正文另起段落",
+      "severity": "medium"
+    },
+    {
+      "comment_id": "C003",
+      "rule_id": "R009",
+      "anchor_text": "摘要：中国民间音乐旋律发展中大量存在着“循环”手法，它包括作为音乐曲体结构的循环体，也包括旋律发展中重复和衍生旋律的发展手法，形成中国民间音乐在旋律发展中的内在逻辑。本文从循环原则、循环路径以及对循环逻辑的哲理阐释三个层面对循环逻辑进行讨论",
+      "comment_content": "【格式错误】中文摘要字数不足\n【规范要求】音乐硕士中文摘要篇幅以300—500字左右为宜\n【修改建议】扩充摘要内容，补充研究对象、方法、结论和创新点，使篇幅达到约300—500字",
+      "suggestion": "扩充摘要内容，补充研究对象、方法、结论和创新点，使篇幅达到约300—500字",
+      "severity": "medium"
+    },
+    {
+      "comment_id": "C004",
+      "rule_id": "R010",
+      "anchor_text": "摘要：中国民间音乐旋律发展中大量存在着“循环”手法，它包括作为音乐曲体结构的循环体，也包括旋律发展中重复和衍生旋律的发展手法，形成中国民间音乐在旋律发展中的内在逻辑。本文从循环原则、循环路径以及对循环逻辑的哲理阐释三个层面对循环逻辑进行讨论",
+      "comment_content": "【格式错误】未发现英文摘要题头“Abstract”\n【规范要求】英文摘要题头“Abstract”位于页面上方居中，用相当于中文小二号字加粗的 Times New Roman 体\n【修改建议】在中文摘要及关键词后补充英文摘要，并设置“Abstract”题头格式",
+      "suggestion": "在中文摘要及关键词后补充英文摘要，并设置“Abstract”题头格式",
+      "severity": "medium"
+    },
+    {
+      "comment_id": "C005",
+      "rule_id": "R016",
+      "anchor_text": "关键词：中国民间音乐；非线性时间；循环逻辑",
+      "comment_content": "【格式错误】中文关键词标签字体不符合规范\n【规范要求】“关键词”三个字用黑体小四号字，后接宋体冒号“：”\n【修改建议】将“关键词”三个字改为黑体小四，冒号保留为宋体冒号“：”",
+      "suggestion": "将“关键词”三个字改为黑体小四，冒号保留为宋体冒号“：”",
+      "severity": "medium"
+    },
+    {
+      "comment_id": "C006",
+      "rule_id": "R022",
+      "anchor_text": "变化中的永恒",
+      "comment_content": "【格式错误】未发现目录题头和目录页\n【规范要求】题头“目录”位于页面上方居中，字间空两个半角字符，用黑体小二号字\n【修改建议】在摘要/关键词后补充目录页，并按规范设置“目  录”题头及目录条目",
+      "suggestion": "在摘要/关键词后补充目录页，并按规范设置“目  录”题头及目录条目",
+      "severity": "medium"
+    },
+    {
+      "comment_id": "C007",
+      "rule_id": "R031",
+      "anchor_text": "在中国民间音乐理论中，学者们通常将“循环”视为一种曲体结构，李西安、军驰所著的《中国民族曲式》一书早在1960年代就已有了对民间音乐“循环体”的论述：“在两个或两个以上段落组成的乐曲中，有一部分音乐反复出现达两次或两次以上，而在它各次出现之",
+      "comment_content": "【格式错误】正文开始前未设置独立的“绪论/序言/引言”题头\n【规范要求】题头“绪论”（或“序言”“引言”）位于页面上方居中，字间空两个半角字符，用黑体小二号字\n【修改建议】在正文开始前增加“绪  论”或“引  言”题头，并按规范设置居中、黑体小二",
+      "suggestion": "在正文开始前增加“绪  论”或“引  言”题头，并按规范设置居中、黑体小二",
+      "severity": "medium"
+    },
+    {
+      "comment_id": "C008",
+      "rule_id": "R043",
+      "anchor_text": "在中国民间音乐理论中，学者们通常将“循环”视为一种曲体结构，李西安、军驰所著的《中国民族曲式》一书早在1960年代就已有了对民间音乐“循环体”的论述：“在两个或两个以上段落组成的乐曲中，有一部分音乐反复出现达两次或两次以上，而在它各次出现之",
+      "comment_content": "【格式错误】正文多处段落未设置为两端对齐\n【规范要求】正文两端对齐\n【修改建议】将全文正文普通段落统一设置为两端对齐",
+      "suggestion": "将全文正文普通段落统一设置为两端对齐",
+      "severity": "medium"
+    },
+    {
+      "comment_id": "C009",
+      "rule_id": "R044",
+      "anchor_text": "在中国民间音乐理论中，学者们通常将“循环”视为一种曲体结构，李西安、军驰所著的《中国民族曲式》一书早在1960年代就已有了对民间音乐“循环体”的论述：“在两个或两个以上段落组成的乐曲中，有一部分音乐反复出现达两次或两次以上，而在它各次出现之",
+      "comment_content": "【格式错误】正文行距不符合固定值20磅要求\n【规范要求】正文行距为固定值20磅\n【修改建议】将全文正文普通段落行距统一设置为固定值20磅",
+      "suggestion": "将全文正文普通段落行距统一设置为固定值20磅",
+      "severity": "medium"
+    },
+    {
+      "comment_id": "C010",
+      "rule_id": "R047",
+      "anchor_text": "变化中的永恒",
+      "comment_content": "【格式错误】未发现正文页码\n【规范要求】正文页码一律使用宋体小四号阿拉伯数字，并延续至全文结束\n【修改建议】在页脚添加阿拉伯数字页码，并设置为宋体小四",
+      "suggestion": "在页脚添加阿拉伯数字页码，并设置为宋体小四",
+      "severity": "medium"
+    },
+    {
+      "comment_id": "C011",
+      "rule_id": "R049",
+      "anchor_text": "变化中的永恒",
+      "comment_content": "【格式错误】页码位置不符合要求或缺失\n【规范要求】页码位于页面底端，居中排版\n【修改建议】在页面底端居中位置插入页码",
+      "suggestion": "在页面底端居中位置插入页码",
+      "severity": "medium"
+    },
+    {
+      "comment_id": "C012",
+      "rule_id": "R077",
+      "anchor_text": "结语",
+      "comment_content": "【格式错误】文末未发现独立参考文献部分\n【规范要求】参考文献列于文末\n【修改建议】在正文/结语后补充参考文献部分，并按规范列出中文和外文参考文献",
+      "suggestion": "在正文/结语后补充参考文献部分，并按规范列出中文和外文参考文献",
+      "severity": "medium"
+    },
+    {
+      "comment_id": "C013",
+      "rule_id": "R038",
+      "anchor_text": "（一）宏观结构下的递归现象",
+      "comment_content": "【格式错误】括号层级标题格式不符合条名格式要求\n【规范要求】条名左缩进两个汉字（0.75厘米），用宋体四号字\n【修改建议】将“（一）（二）（三）”等同级标题统一设置为宋体四号，左缩进两个汉字",
+      "suggestion": "将“（一）（二）（三）”等同级标题统一设置为宋体四号，左缩进两个汉字",
+      "severity": "medium"
+    },
+    {
+      "comment_id": "C014",
+      "rule_id": "R038",
+      "anchor_text": "（三）递归与衍生的交互生成",
+      "comment_content": "【格式错误】同级括号标题样式不统一\n【规范要求】括号层级标题应按条名格式处理，左缩进两个汉字，用宋体四号字\n【修改建议】将该标题改为与“（一）（二）”同级的条名样式，避免使用一级标题样式",
+      "suggestion": "将该标题改为与“（一）（二）”同级的条名样式，避免使用一级标题样式",
+      "severity": "medium"
+    },
+    {
+      "comment_id": "C015",
+      "rule_id": "R103",
+      "anchor_text": "表1：江南丝竹《三六》循环结构",
+      "comment_content": "【格式错误】表号、表题字体不符合规范\n【规范要求】表号、表题用小四号黑体字\n【修改建议】将所有表号、表题统一设置为小四号黑体",
+      "suggestion": "将所有表号、表题统一设置为小四号黑体",
+      "severity": "medium"
+    },
+    {
+      "comment_id": "C016",
+      "rule_id": "R102",
+      "anchor_text": "表4：长三角地区乱弹系统与滩簧系统剧种部分三段唱腔结构，单奕翔整理",
+      "comment_content": "【格式错误】表号、表题未居中排列\n【规范要求】表号、表题置于表格上方并居中排列\n【修改建议】将该表题设置为表格上方居中，并同步检查其他表题位置",
+      "suggestion": "将该表题设置为表格上方居中，并同步检查其他表题位置",
+      "severity": "medium"
+    },
+    {
+      "comment_id": "C017",
+      "rule_id": "R091",
+      "anchor_text": "谱例2a：彝族民歌《猜调》垛句",
+      "comment_content": "【格式错误】谱例编号未按全文顺序编号样式统一\n【规范要求】不分章节论文的谱例全文顺序编号，如“谱例1”“谱例2”\n【修改建议】统一改为全文连续编号；如确需子编号，请在规范中补充子编号规则并人工确认",
+      "suggestion": "统一改为全文连续编号；如确需子编号，请在规范中补充子编号规则并人工确认",
+      "severity": "medium"
+    },
+    {
+      "comment_id": "C018",
+      "rule_id": "R093",
+      "anchor_text": "谱例1：广东音乐《雨打芭蕉》片段",
+      "comment_content": "【格式错误】谱例名称位置和字体不符合规范\n【规范要求】谱例名称用小四号黑体字，置于谱例左上方，左缩进两个汉字\n【修改建议】将所有谱例名称改为小四号黑体，放在谱例左上方并左缩进两个汉字",
+      "suggestion": "将所有谱例名称改为小四号黑体，放在谱例左上方并左缩进两个汉字",
+      "severity": "medium"
+    },
+    {
+      "comment_id": "C019",
+      "rule_id": "R088",
+      "anchor_text": "谱例1：广东音乐《雨打芭蕉》片段",
+      "comment_content": "【格式错误】节选谱例出处要素不完整\n【规范要求】节选片段谱例须注明作品名称、出版社、年代、节选章节、小节数等\n【修改建议】为每个节选谱例补充出处说明；可置于谱例题名、脚注或图注中",
+      "suggestion": "为每个节选谱例补充出处说明；可置于谱例题名、脚注或图注中",
+      "severity": "medium"
+    }
+  ]
+}

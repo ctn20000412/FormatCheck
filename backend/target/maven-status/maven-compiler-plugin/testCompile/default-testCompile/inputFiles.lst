@@ -1,1 +1,4 @@
-E:\code\formatCheck\backend\src\test\java\com\formatcheck\backend\BackendApplicationTests.java
+E:\code\formatCheck\backend\src\test\java\com\formatcheck\backend\service\FileValidationTest.java
+E:\code\formatCheck\backend\src\test\java\com\formatcheck\backend\service\FormatCheckServiceTest.java
+E:\code\formatCheck\backend\src\test\java\com\formatcheck\backend\service\ModelCatalogServiceTest.java
+E:\code\formatCheck\backend\src\test\java\com\formatcheck\backend\service\ResultWorkspaceFactoryTest.java

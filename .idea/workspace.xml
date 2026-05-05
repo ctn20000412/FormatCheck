@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="6e4aebe5-b7b1-48bd-9f2b-25e068dc63a1" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_zaxxer_HikariCP_6_3_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_mybatis_mybatis_3_5_17.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_mybatis_mybatis_spring_3_0_4.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_mybatis_spring_boot_mybatis_spring_boot_autoconfigure_3_0_4.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_mybatis_spring_boot_mybatis_spring_boot_starter_3_0_4.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_springframework_boot_spring_boot_configuration_processor_3_5_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_springframework_boot_spring_boot_starter_jdbc_3_5_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_springframework_spring_jdbc_6_2_7.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_springframework_spring_tx_6_2_7.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/agent-service/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agent-service/app/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/agent-service/app/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/agent-service/app/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/agent-service/app/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/agent-service/app/models/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agent-service/app/models/contracts.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agent-service/app/routers/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agent-service/app/routers/internal_agent.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agent-service/app/services/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agent-service/app/services/annotation_writer.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agent-service/app/services/checker_agent.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agent-service/app/services/document_parser.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agent-service/app/services/extractor_agent.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agent-service/app/services/json_utils.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agent-service/app/services/llm_gateway.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agent-service/app/services/report_builder.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agent-service/app/services/rule_file_loader.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agent-service/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/agent-service/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/backend.iml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/backend.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/formatcheck/backend/common/ApiException.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/formatcheck/backend/common/ApiResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/formatcheck/backend/common/ApiResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/formatcheck/backend/common/ErrorCode.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/formatcheck/backend/common/GlobalExceptionHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/formatcheck/backend/common/GlobalExceptionHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/formatcheck/backend/config/AppProperties.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/formatcheck/backend/config/AppProperties.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/formatcheck/backend/controller/AgentController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/formatcheck/backend/controller/CheckController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/formatcheck/backend/controller/RuleController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/formatcheck/backend/controller/RuleImportController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/formatcheck/backend/controller/SessionController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/formatcheck/backend/domain/enums/AgentProvider.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/formatcheck/backend/domain/enums/DownloadFileType.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/formatcheck/backend/domain/enums/RuleSource.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/formatcheck/backend/domain/enums/SessionType.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/formatcheck/backend/domain/enums/TaskStatus.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/formatcheck/backend/domain/model/CheckIssue.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/formatcheck/backend/domain/model/RuleItem.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/formatcheck/backend/domain/model/SessionMeta.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/formatcheck/backend/dto/request/CheckRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/formatcheck/backend/dto/request/ConfirmRuleRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/formatcheck/backend/dto/request/CreateSessionRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/formatcheck/backend/dto/request/RuleExtractRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/formatcheck/backend/dto/response/AgentProviderVO.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/formatcheck/backend/dto/response/ArtifactVO.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/formatcheck/backend/dto/response/CheckResultVO.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/formatcheck/backend/dto/response/FileUploadVO.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/formatcheck/backend/dto/response/RuleConfirmVO.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/formatcheck/backend/dto/response/RuleImportVO.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/formatcheck/backend/dto/response/RuleVO.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/formatcheck/backend/dto/response/SessionDetailVO.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/formatcheck/backend/dto/response/SessionVO.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/formatcheck/backend/dto/response/TaskVO.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/formatcheck/backend/service/AgentClient.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/formatcheck/backend/service/AgentExecutionOptions.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/formatcheck/backend/service/AgentProviderService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/formatcheck/backend/service/CheckService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/formatcheck/backend/service/HttpPythonAgentClient.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/formatcheck/backend/service/MockAgentClient.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/formatcheck/backend/service/PromptTemplateService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/formatcheck/backend/service/RuleFileCodec.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/formatcheck/backend/service/RuleService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/formatcheck/backend/service/SessionService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/formatcheck/backend/service/StorageService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/application.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/test/java/com/formatcheck/backend/BackendApplicationTests.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/META-INF/spring-configuration-metadata.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/application.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/FormatCheckApplication.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/FormatCheckApplication.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/common/ApiException.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/common/ApiResponse.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/common/ApiResponse.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/common/ErrorCode.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/common/GlobalExceptionHandler.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/common/GlobalExceptionHandler.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/config/AppProperties$Agent.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/config/AppProperties$Prompt.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/config/AppProperties$Provider.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/config/AppProperties$Storage.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/config/AppProperties.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/config/AppProperties.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/controller/AgentController.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/controller/CheckController.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/controller/RuleController.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/controller/RuleImportController.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/controller/SessionController.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/domain/enums/AgentProvider.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/domain/enums/DownloadFileType.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/domain/enums/RuleSource.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/domain/enums/SessionType.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/domain/enums/TaskStatus.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/domain/model/CheckIssue$Location.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/domain/model/CheckIssue.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/domain/model/RuleItem.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/domain/model/SessionMeta.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/dto/request/CheckRequest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/dto/request/ConfirmRuleRequest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/dto/request/CreateSessionRequest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/dto/request/RuleExtractRequest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/dto/response/AgentProviderVO.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/dto/response/ArtifactVO.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/dto/response/CheckResultVO.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/dto/response/FileUploadVO.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/dto/response/RuleConfirmVO.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/dto/response/RuleImportVO.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/dto/response/RuleVO.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/dto/response/SessionDetailVO.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/dto/response/SessionVO.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/dto/response/TaskVO.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/service/AgentClient$CheckExecutionResult.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/service/AgentClient$ExtractionResult.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/service/AgentClient.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/service/AgentExecutionOptions.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/service/AgentProviderService.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/service/CheckService.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/service/HttpPythonAgentClient$CheckAgentRequest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/service/HttpPythonAgentClient$CheckAgentResponse.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/service/HttpPythonAgentClient$RuleExtractAgentRequest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/service/HttpPythonAgentClient$RuleExtractAgentResponse.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/service/HttpPythonAgentClient.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/service/MockAgentClient.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/service/PromptTemplateService.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/service/RuleFileCodec$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/service/RuleFileCodec.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/service/RuleService.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/service/SessionService.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/service/StorageService$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/service/StorageService$2.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/formatcheck/backend/service/StorageService.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/createdFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/createdFiles.lst" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/inputFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/inputFiles.lst" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/surefire-reports/2026-04-21T20-00-52_929.dumpstream" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/surefire-reports/2026-04-21T20-08-46_990.dumpstream" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/surefire-reports/TEST-com.formatcheck.backend.BackendApplicationTests.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/surefire-reports/com.formatcheck.backend.BackendApplicationTests.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/test-classes/com/formatcheck/backend/BackendApplicationTests.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/test-storage/sessions/sess_20260421200056_8ed944/logs/agent-request.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/test-storage/sessions/sess_20260421200056_8ed944/logs/agent-response.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/test-storage/sessions/sess_20260421200056_8ed944/meta.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/test-storage/sessions/sess_20260421200056_8ed944/rules/rules.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/test-storage/sessions/sess_20260421200056_8ed944/rules/规范.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/test-storage/sessions/sess_20260421200056_8ed944/source/standard.docx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/test-storage/sessions/sess_20260421200848_1958f3/logs/agent-request.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/test-storage/sessions/sess_20260421200848_1958f3/logs/agent-response.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/test-storage/sessions/sess_20260421200848_1958f3/meta.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/test-storage/sessions/sess_20260421200848_1958f3/rules/rules.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/test-storage/sessions/sess_20260421200848_1958f3/rules/规范.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/test-storage/sessions/sess_20260421200848_1958f3/source/standard.docx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/PRD.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/openapi.yaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/接口测试示例.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/流程设计.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/流程设计.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/测试用例.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/测试用例.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/软件设计说明.md" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectId" id="3D1t0UccIifQZks6UIrcdUjjtys" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "spring.configuration.checksum": "b43fdd98b1fd705ae4c3a10cf25aad8a",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RunManager">
+    <configuration name="FormatCheckApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <module name="backend" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.formatcheck.backend.FormatCheckApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="6e4aebe5-b7b1-48bd-9f2b-25e068dc63a1" name="Changes" comment="" />
+      <created>1777461181643</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1777461181643</updated>
+      <workItem from="1777461183386" duration="1858000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>

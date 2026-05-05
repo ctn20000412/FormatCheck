@@ -1,0 +1,7 @@
+﻿interface:
+  display_name: "论文格式检查"
+  short_description: "根据文档规范检查论文格式并生成错误统计报告和批注版论文"
+  default_prompt: "Use $check-paper-format to compare a document formatting standard with a thesis and generate an error statistics report plus an annotated paper."
+
+policy:
+  allow_implicit_invocation: true

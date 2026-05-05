@@ -1,0 +1,7 @@
+interface:
+  display_name: "格式规范提取"
+  short_description: "从规范文件中提取格式排版规则并生成 JSON 文件"
+  default_prompt: "Use $extract-format-rules to extract formatting requirements from an uploaded PDF, Word, or Markdown standard document into JSON."
+
+policy:
+  allow_implicit_invocation: true

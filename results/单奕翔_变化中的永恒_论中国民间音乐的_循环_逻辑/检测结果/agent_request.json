@@ -1,0 +1,11 @@
+{
+  "analysis_output" : "E:\\code\\formatCheck\\results\\单奕翔_变化中的永恒_论中国民间音乐的_循环_逻辑\\检测结果\\format_check_analysis.docx",
+  "check_result_output" : "E:\\code\\formatCheck\\results\\单奕翔_变化中的永恒_论中国民间音乐的_循环_逻辑\\检测结果\\format_check_result.json",
+  "annotated_output" : "E:\\code\\formatCheck\\results\\单奕翔_变化中的永恒_论中国民间音乐的_循环_逻辑\\检测后带批注的源文件\\单奕翔：变化中的永恒——论中国民间音乐的“循环”逻辑_格式检查批注版.docx",
+  "model" : "deepseek-v4-flash",
+  "provider" : "deepseek",
+  "checked_file" : "E:\\code\\formatCheck\\results\\单奕翔_变化中的永恒_论中国民间音乐的_循环_逻辑\\待检测文件\\单奕翔：变化中的永恒——论中国民间音乐的“循环”逻辑.docx",
+  "work_dir" : "E:\\code\\formatCheck\\results\\单奕翔_变化中的永恒_论中国民间音乐的_循环_逻辑",
+  "format_rule_output" : "E:\\code\\formatCheck\\results\\单奕翔_变化中的永恒_论中国民间音乐的_循环_逻辑\\规则抽取结果\\format_rule.json",
+  "standard_file" : "E:\\code\\formatCheck\\results\\单奕翔_变化中的永恒_论中国民间音乐的_循环_逻辑\\规则规范文件\\中央音乐学院格式规范pdf.pdf"
+}

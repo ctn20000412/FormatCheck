@@ -1,9 +1,0 @@
-{
-  "model" : "deepseek-chat",
-  "outputDir" : "E:\\code\\formatCheck\\backend\\target\\test-storage\\sessions\\sess_20260421200848_1958f3\\rules",
-  "promptText" : "你是规则抽取 Agent。请基于上传的规范文件提取文档排版、格式、标题层级、编号、图表要求，并按约定 schema 输出。",
-  "filePath" : "E:\\code\\formatCheck\\backend\\target\\test-storage\\sessions\\sess_20260421200848_1958f3\\source\\standard.docx",
-  "schemaVersion" : "1.0",
-  "provider" : "DEEPSEEK",
-  "sessionId" : "sess_20260421200848_1958f3"
-}

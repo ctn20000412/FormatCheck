@@ -1,0 +1,45 @@
+{
+  "paper_analysis": {
+    "standard_file": "format_rules.json",
+    "paper_file": "sample_paper.docx",
+    "paper_type": "docx",
+    "selected_parser": "docx text and OOXML parser",
+    "check_summary": "?? 1 ??????"
+  },
+  "statistics": {
+    "total_issues": 1,
+    "by_category": {
+      "font_and_size": 1
+    },
+    "by_severity": {
+      "medium": 1
+    },
+    "need_manual_confirmation": 0,
+    "checked_rule_count": 1
+  },
+  "issues": [
+    {
+      "issue_id": "I001",
+      "category": "font_and_size",
+      "severity": "medium",
+      "location": {
+        "page": "1",
+        "section": "??",
+        "paragraph_index": "2",
+        "object_type": "paragraph",
+        "quote": "???????"
+      },
+      "anchor_text": "???????",
+      "rule_id": "R001",
+      "rule_name": "????",
+      "expected": "?????",
+      "actual": "??",
+      "problem": "??????????",
+      "reason": "???????????????????????",
+      "suggestion": "?????????????",
+      "comment_text": "??????????????????????????????????",
+      "confidence": "high",
+      "need_manual_confirmation": false
+    }
+  ]
+}

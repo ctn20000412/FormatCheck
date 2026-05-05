@@ -1,0 +1,36 @@
+{
+  "paper_analysis": {
+    "standard_file": "format_rule.json",
+    "paper_file": "单奕翔：变化中的永恒——论中国民间音乐的“循环”逻辑.docx",
+    "paper_type": "docx",
+    "selected_parser": "llm-document-reader",
+    "llm_provider": "deepseek",
+    "llm_model": "deepseek-v4-flash",
+    "check_summary": "已由 LLM 根据抽取规则完成论文格式检查。"
+  },
+  "statistics": {
+    "total_issues": 0,
+    "by_category": {},
+    "by_severity": {},
+    "need_manual_confirmation": 0,
+    "checked_rule_count": 0
+  },
+  "issues": [],
+  "llm_raw": {
+    "paper_analysis": {
+      "standard_file": "中央音乐学院格式规范pdf.pdf",
+      "paper_file": "单奕翔：变化中的永恒——论中国民间音乐的“循环”逻辑.docx",
+      "paper_type": "docx",
+      "selected_parser": "llm-document-reader",
+      "check_summary": "未提供格式规则，无法检查。"
+    },
+    "statistics": {
+      "total_issues": 0,
+      "by_category": {},
+      "by_severity": {},
+      "need_manual_confirmation": 0,
+      "checked_rule_count": 0
+    },
+    "issues": []
+  }
+}

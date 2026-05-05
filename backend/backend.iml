@@ -14,7 +14,7 @@
       <configuration />
     </facet>
   </component>
-  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_19">
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_17">
     <output url="file://$MODULE_DIR$/target/classes" />
     <output-test url="file://$MODULE_DIR$/target/test-classes" />
     <content url="file://$MODULE_DIR$">
@@ -61,15 +61,6 @@
     <orderEntry type="library" name="Maven: jakarta.validation:jakarta.validation-api:3.0.2" level="project" />
     <orderEntry type="library" name="Maven: org.jboss.logging:jboss-logging:3.6.1.Final" level="project" />
     <orderEntry type="library" name="Maven: com.fasterxml:classmate:1.7.0" level="project" />
-    <orderEntry type="library" name="Maven: org.springframework.boot:spring-boot-configuration-processor:3.5.0" level="project" />
-    <orderEntry type="library" name="Maven: org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.4" level="project" />
-    <orderEntry type="library" name="Maven: org.springframework.boot:spring-boot-starter-jdbc:3.5.0" level="project" />
-    <orderEntry type="library" name="Maven: com.zaxxer:HikariCP:6.3.0" level="project" />
-    <orderEntry type="library" name="Maven: org.springframework:spring-jdbc:6.2.7" level="project" />
-    <orderEntry type="library" name="Maven: org.springframework:spring-tx:6.2.7" level="project" />
-    <orderEntry type="library" name="Maven: org.mybatis.spring.boot:mybatis-spring-boot-autoconfigure:3.0.4" level="project" />
-    <orderEntry type="library" name="Maven: org.mybatis:mybatis:3.5.17" level="project" />
-    <orderEntry type="library" name="Maven: org.mybatis:mybatis-spring:3.0.4" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.springframework.boot:spring-boot-starter-test:3.5.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.springframework.boot:spring-boot-test:3.5.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.springframework.boot:spring-boot-test-autoconfigure:3.5.0" level="project" />

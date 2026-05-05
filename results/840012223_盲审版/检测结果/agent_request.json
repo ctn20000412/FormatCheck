@@ -1,0 +1,14 @@
+{
+  "provider" : "deepseek",
+  "model" : "deepseek-v4-flash",
+  "workflow" : "compare",
+  "work_dir" : "E:\\code\\formatCheck\\results\\840012223_盲审版",
+  "checked_file" : "E:\\code\\formatCheck\\results\\840012223_盲审版\\待检测文件\\840012223-盲审版.docx",
+  "standard_file" : "E:\\code\\formatCheck\\results\\840012223_盲审版\\规则规范文件\\电信院硕士研究生学位论文格式规范.docx",
+  "format_rule_output" : "E:\\code\\formatCheck\\results\\840012223_盲审版\\规则抽取结果\\format_rule.json",
+  "check_result_output" : "E:\\code\\formatCheck\\results\\840012223_盲审版\\检测结果\\format_check_result.json",
+  "analysis_output" : "E:\\code\\formatCheck\\results\\840012223_盲审版\\检测结果\\format_check_analysis.docx",
+  "annotated_output" : "E:\\code\\formatCheck\\results\\840012223_盲审版\\检测后带批注的源文件\\840012223-盲审版_格式检查批注版.docx",
+  "llm_config_path" : "E:\\code\\formatCheck\\agent-service\\config\\llm_providers.json",
+  "llm_local_config_path" : "E:\\code\\formatCheck\\agent-service\\config\\llm_providers.local.json"
+}

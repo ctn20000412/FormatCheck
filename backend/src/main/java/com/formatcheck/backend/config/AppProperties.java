@@ -1,157 +1,118 @@
 package com.formatcheck.backend.config;
 
-import com.formatcheck.backend.domain.enums.AgentProvider;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
-@ConfigurationProperties(prefix = "app")
+@ConfigurationProperties(prefix = "format-check")
 public class AppProperties {
+    private String storageRoot = "../results";
+    private String pythonExecutable = "python";
+    private String pythonScript = "../agent-service/app/main.py";
+    private String modelConfig = "../agent-service/config/llm_providers.json";
+    private long pythonTimeoutSeconds = 300;
+    private String agentBaseUrl = "http://127.0.0.1:8001";
+    private long agentTimeoutSeconds = 300;
 
-    private final Storage storage = new Storage();
-    private final Prompt prompt = new Prompt();
-    private final Agent agent = new Agent();
-
-    public Storage getStorage() {
-        return storage;
+    public String getStorageRoot() {
+        return storageRoot;
     }
 
-    public Prompt getPrompt() {
-        return prompt;
+    public void setStorageRoot(String storageRoot) {
+        this.storageRoot = storageRoot;
     }
 
-    public Agent getAgent() {
-        return agent;
+    public Path getStorageRootPath() {
+        return resolveLocalPath(storageRoot);
     }
 
-    public static class Storage {
-        private String root = "storage/sessions";
-
-        public String getRoot() {
-            return root;
-        }
-
-        public void setRoot(String root) {
-            this.root = root;
-        }
+    public String getPythonExecutable() {
+        return pythonExecutable;
     }
 
-    public static class Prompt {
-        private String extractTemplate;
-        private String checkTemplate;
-
-        public String getExtractTemplate() {
-            return extractTemplate;
-        }
-
-        public void setExtractTemplate(String extractTemplate) {
-            this.extractTemplate = extractTemplate;
-        }
-
-        public String getCheckTemplate() {
-            return checkTemplate;
-        }
-
-        public void setCheckTemplate(String checkTemplate) {
-            this.checkTemplate = checkTemplate;
-        }
+    public void setPythonExecutable(String pythonExecutable) {
+        this.pythonExecutable = pythonExecutable;
     }
 
-    public static class Agent {
-        private String mode = "mock";
-        private String baseUrl = "http://localhost:9000";
-        private int connectTimeoutSeconds = 10;
-        private int readTimeoutSeconds = 180;
-        private AgentProvider defaultProvider = AgentProvider.DEEPSEEK;
-        private final Map<String, Provider> providers = new LinkedHashMap<>();
-
-        public String getMode() {
-            return mode;
-        }
-
-        public void setMode(String mode) {
-            this.mode = mode;
-        }
-
-        public String getBaseUrl() {
-            return baseUrl;
-        }
-
-        public void setBaseUrl(String baseUrl) {
-            this.baseUrl = baseUrl;
-        }
-
-        public int getConnectTimeoutSeconds() {
-            return connectTimeoutSeconds;
-        }
-
-        public void setConnectTimeoutSeconds(int connectTimeoutSeconds) {
-            this.connectTimeoutSeconds = connectTimeoutSeconds;
-        }
-
-        public int getReadTimeoutSeconds() {
-            return readTimeoutSeconds;
-        }
-
-        public void setReadTimeoutSeconds(int readTimeoutSeconds) {
-            this.readTimeoutSeconds = readTimeoutSeconds;
-        }
-
-        public AgentProvider getDefaultProvider() {
-            return defaultProvider;
-        }
-
-        public void setDefaultProvider(AgentProvider defaultProvider) {
-            this.defaultProvider = defaultProvider;
-        }
-
-        public Map<String, Provider> getProviders() {
-            return providers;
-        }
+    public String getPythonScript() {
+        return pythonScript;
     }
 
-    public static class Provider {
-        private boolean enabled = true;
-        private String baseUrl;
-        private String apiKey;
-        private String defaultModel;
-        private final Map<String, String> extra = new LinkedHashMap<>();
+    public void setPythonScript(String pythonScript) {
+        this.pythonScript = pythonScript;
+    }
 
-        public boolean isEnabled() {
-            return enabled;
+    public String getModelConfig() {
+        return modelConfig;
+    }
+
+    public void setModelConfig(String modelConfig) {
+        this.modelConfig = modelConfig;
+    }
+
+    public Path getModelConfigPath() {
+        return resolveLocalPath(modelConfig);
+    }
+
+    public long getPythonTimeoutSeconds() {
+        return pythonTimeoutSeconds;
+    }
+
+    public void setPythonTimeoutSeconds(long pythonTimeoutSeconds) {
+        this.pythonTimeoutSeconds = pythonTimeoutSeconds;
+    }
+
+    public Path getPythonScriptPath() {
+        return resolveLocalPath(pythonScript);
+    }
+
+    public String getAgentBaseUrl() {
+        return agentBaseUrl;
+    }
+
+    public void setAgentBaseUrl(String agentBaseUrl) {
+        this.agentBaseUrl = agentBaseUrl;
+    }
+
+    public long getAgentTimeoutSeconds() {
+        return agentTimeoutSeconds;
+    }
+
+    public void setAgentTimeoutSeconds(long agentTimeoutSeconds) {
+        this.agentTimeoutSeconds = agentTimeoutSeconds;
+    }
+
+    public Path getLocalModelConfigPath() {
+        Path modelConfigPath = getModelConfigPath();
+        Path parent = modelConfigPath.getParent();
+        if (parent == null) {
+            return Path.of("llm_providers.local.json").toAbsolutePath().normalize();
+        }
+        return parent.resolve("llm_providers.local.json").normalize();
+    }
+
+    private Path resolveLocalPath(String value) {
+        Path configured = Path.of(value);
+        if (configured.isAbsolute()) {
+            return configured.normalize();
         }
 
-        public void setEnabled(boolean enabled) {
-            this.enabled = enabled;
+        Path direct = configured.toAbsolutePath().normalize();
+        if (Files.exists(direct)) {
+            return direct;
         }
 
-        public String getBaseUrl() {
-            return baseUrl;
+        Path cwd = Path.of("").toAbsolutePath().normalize();
+        if (configured.getNameCount() > 1 && "..".equals(configured.getName(0).toString())) {
+            Path withoutLeadingParent = configured.subpath(1, configured.getNameCount());
+            return cwd.resolve(withoutLeadingParent).normalize();
         }
 
-        public void setBaseUrl(String baseUrl) {
-            this.baseUrl = baseUrl;
+        Path fromParent = cwd.resolve("..").resolve(configured).normalize();
+        if (Files.exists(fromParent)) {
+            return fromParent;
         }
 
-        public String getApiKey() {
-            return apiKey;
-        }
-
-        public void setApiKey(String apiKey) {
-            this.apiKey = apiKey;
-        }
-
-        public String getDefaultModel() {
-            return defaultModel;
-        }
-
-        public void setDefaultModel(String defaultModel) {
-            this.defaultModel = defaultModel;
-        }
-
-        public Map<String, String> getExtra() {
-            return extra;
-        }
+        return direct;
     }
 }
